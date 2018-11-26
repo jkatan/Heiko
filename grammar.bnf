@@ -1,0 +1,50 @@
+<block> 		::= 	"STARTING_BLOCK_SYMBOL" <instruction> "ENDING_BLOCK_SYMBOL"
+
+<instruction>	::=  	<vardecl>"DELITIMITER"
+					 |	<vardecl> "DELITIMITER" <instruction>
+					 |	<operation> "DELITIMITER"
+					 |	<operation> "DELITIMITER" <instruction>
+					 |	<ifblock>
+					 |	<ifblock> <instruction>
+					 |	<whileblock>
+					 |	<whileblock> <instruction>
+					 |	<initvar> "DELITIMITER"
+					 |	<initvar> "DELITIMITER" <instruction>
+
+<vardecl>		::=		<datatype> <initvar>
+					 |	<datatype> "VAR_NAME"
+					 |	"CONSTANT" <datatype> <initvar>
+
+<initvar>		::=		"VAR_NAME" "ASSIGN_OPERATOR" <arithmetic>
+
+<arithmetic> 	::=		<arithmetic> "SUM_CARACHTER" <arithmetic>
+					 |	<arithmetic> "MULTIPLY_CARACHTER" <arithmetic>
+					 |	<arithmetic> "SUBSTRACTION_CARACHTER" <arithmetic>
+					 |	<arithmetic> "DIVISION_CARACHTER" <arithmetic>
+					 | 	"VAR_NAME"
+					 |	"NUMBER"
+					 |	"STRING"
+					 |	"VECTOR"
+					 |	"MATRIX"
+
+<operation>		::=		"OPERATION_NAME" "START_PARENTHESIS" "END_PARENTHENSIS"
+					 |	"OPERATION_NAME" "START_PARENTHESIS" <param> "END_PARENTHENSIS"
+
+<param>			::=		<arithmetic>
+					 |	<arithmetic> "PARAM_DELMITER"
+
+<ifblock>		::=		"IF_START" <condition>	<block>
+
+<whileblock>	::=		"WHILE_START" <condition> <block>
+
+<condition>		::=		"BOOLEAN"
+					 |	<arithmetic> "GREATER_THAN_SYMBOL" <arithmetic>
+					 |	<arithmetic> "LESS_THAN_SYMBOL" <arithmetic>	
+					 |	<arithmetic> "GREATER_OR_EQUAL_THAN_SYMBOL" <arithmetic>
+					 |	<arithmetic> "LESS_OR_EQUAL_THAN_SYMBOL" <arithmetic>
+					 |	<arithmetic> "IS_EQUALS_SYMBOL" <arithmetic>
+					 |	"NOT_SYMBOL" <condition>
+					 |	<arithmetic> "IS_NOT_EQUALS" <arithmetic>
+					 |	<condition> "OR_SYMBOL" <condition>
+					 |	<condition>	"AND_SYMBOL" <condition>
+					 |	<condition> "XOR_SYMBOL" <condition>
