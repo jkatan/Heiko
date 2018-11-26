@@ -5,6 +5,7 @@
 	#include <ctype.h>
 	#include <string.h>
 	#include "y.tab.h"
+	#include "map.h"
 
 %}
 
