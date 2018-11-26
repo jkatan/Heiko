@@ -33,7 +33,9 @@
 <param>			::=		<arithmetic>
 					 |	<arithmetic> "PARAM_DELMITER"
 
-<ifblock>		::=		"IF_START" <condition>	<block>
+<ifblock>		::=		"IF_START" <condition> <block>	
+					 | 	"IF_START" <condition> <block> "ELSE_START" <block>
+					 |	"IF_START" <condition> <block> "ELSE_START" <ifblock>
 
 <whileblock>	::=		"WHILE_START" <condition> <block>
 
