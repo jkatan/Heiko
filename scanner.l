@@ -47,11 +47,4 @@ boolean		[true|false]
 "\t"		
 "\n"
 
-
-{alpha}({alpha}|{digit})*		{
-									char* str = (char*) malloc(strlen(yytext) * sizeof(char));
-									strcpy(str, yytext);
-								}
-
-
 %%
