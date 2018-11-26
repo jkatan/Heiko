@@ -1,4 +1,0 @@
-%{
-	#include <ctype.h>
-
-}%

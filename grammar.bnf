@@ -24,14 +24,15 @@
 					 | 	"VAR_NAME"
 					 |	"NUMBER"
 					 |	"STRING"
-					 |	"VECTOR"
+					 |	"ARRAY"
 					 |	"MATRIX"
+					 |	<dereference>
 
 <operation>		::=		"OPERATION_NAME" "START_PARENTHESIS" "END_PARENTHENSIS"
 					 |	"OPERATION_NAME" "START_PARENTHESIS" <param> "END_PARENTHENSIS"
 
 <param>			::=		<arithmetic>
-					 |	<arithmetic> "PARAM_DELMITER"
+					 |	<arithmetic> "COMMA"
 
 <ifblock>		::=		"IF_START" <condition> <block>	
 					 | 	"IF_START" <condition> <block> "ELSE_START" <block>
@@ -40,18 +41,33 @@
 <whileblock>	::=		"WHILE_START" <condition> <block>
 
 <condition>		::=		"BOOLEAN"
-					 |	<arithmetic> "GREATER_THAN_SYMBOL" <arithmetic>
-					 |	<arithmetic> "LESS_THAN_SYMBOL" <arithmetic>	
-					 |	<arithmetic> "GREATER_OR_EQUAL_THAN_SYMBOL" <arithmetic>
-					 |	<arithmetic> "LESS_OR_EQUAL_THAN_SYMBOL" <arithmetic>
-					 |	<arithmetic> "IS_EQUALS_SYMBOL" <arithmetic>
-					 |	"NOT_SYMBOL" <condition>
-					 |	<arithmetic> "IS_NOT_EQUALS" <arithmetic>
-					 |	<condition> "OR_SYMBOL" <condition>
-					 |	<condition>	"AND_SYMBOL" <condition>
-					 |	<condition> "XOR_SYMBOL" <condition>
+					 |	"START_PARENTHESIS" <arithmetic> "GREATER_THAN_SYMBOL" <arithmetic> "END_PARENTHENSIS"
+					 |	"START_PARENTHESIS" <arithmetic> "LESS_THAN_SYMBOL" <arithmetic> "END_PARENTHENSIS"	
+					 |	"START_PARENTHESIS" <arithmetic> "GREATER_OR_EQUAL_THAN_SYMBOL" <arithmetic> "END_PARENTHENSIS"
+					 |	"START_PARENTHESIS" <arithmetic> "LESS_OR_EQUAL_THAN_SYMBOL" <arithmetic> "END_PARENTHENSIS"
+					 |	"START_PARENTHESIS" <arithmetic> "IS_EQUALS_SYMBOL" <arithmetic> "END_PARENTHENSIS"
+					 |	"NOT_SYMBOL" <condition> 
+					 |	"START_PARENTHESIS" <arithmetic> "IS_NOT_EQUALS" <arithmetic> "END_PARENTHENSIS"
+					 |	"START_PARENTHESIS" <condition> "OR_SYMBOL" <condition> "END_PARENTHENSIS"
+					 |	"START_PARENTHESIS" <condition>	"AND_SYMBOL" <condition> "END_PARENTHENSIS"
+					 |	"START_PARENTHESIS" <condition> "XOR_SYMBOL" <condition> "END_PARENTHENSIS"
 
 <datatype>		::=		"NUMBER"
 					 |	"STRING"
-					 |	"VECTOR"
+					 |	"ARRAY"
 					 |	"MATRIX"
+
+<dereference>	::=		"ARRAY" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"  
+					 |	"ARRAY" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" 
+					 |	"MATRIX" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"     
+					 |	"MATRIX" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"   
+					 |	"MATRIX" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" 
+					 |	"MATRIX" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"
+					 |	"MATRIX" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"  
+					 |	"MATRIX" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"   
+					 |	"VAR_NAME" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"
+					 |	"VAR_NAME" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"
+					 |	"VAR_NAME" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"    
+					 |	"VAR_NAME"	"STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"  
+					 |	"VAR_NAME"	"STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"
+					 |	"VAR_NAME"	"STARTING_BRACKET" "NUMBER" "ENDING_BRACKET" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"  
