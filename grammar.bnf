@@ -50,3 +50,8 @@
 					 |	<condition> "OR_SYMBOL" <condition>
 					 |	<condition>	"AND_SYMBOL" <condition>
 					 |	<condition> "XOR_SYMBOL" <condition>
+
+<datatype>		::=		"NUMBER"
+					 |	"STRING"
+					 |	"VECTOR"
+					 |	"MATRIX"
