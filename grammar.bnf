@@ -1,15 +1,15 @@
 <block> 		::= 	"STARTING_BLOCK_SYMBOL" <instruction> "ENDING_BLOCK_SYMBOL"
 
-<instruction>	::=  	<vardecl>"DELITIMITER"
-					 |	<vardecl> "DELITIMITER" <instruction>
-					 |	<operation> "DELITIMITER"
-					 |	<operation> "DELITIMITER" <instruction>
+<instruction>	::=  	<vardecl>"DELIMITER"
+					 |	<vardecl> "DELIMITER" <instruction>
+					 |	<operation> "DELIMITER"
+					 |	<operation> "DELIMITER" <instruction>
 					 |	<ifblock>
 					 |	<ifblock> <instruction>
 					 |	<whileblock>
 					 |	<whileblock> <instruction>
-					 |	<initvar> "DELITIMITER"
-					 |	<initvar> "DELITIMITER" <instruction>
+					 |	<initvar> "DELIMITER"
+					 |	<initvar> "DELIMITER" <instruction>
 
 <vardecl>		::=		<datatype> <initvar>
 					 |	<datatype> "VAR_NAME"
