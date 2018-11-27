@@ -1,3 +1,3 @@
 start
-number miVarialbe = 8;
+string str = "hola";
 end
