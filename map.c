@@ -6,17 +6,22 @@ map* newmap()
 {
 	map* m = malloc(sizeof(map));
 	m->first = NULL;
+	m->level = -1;
 	return m;
 }
 
 int addvariabletomap(map* m, int type, char* varname)
 {
+	if(m->level < 0)
+	{
+		return FAILURE;
+	}
 	int ans;
-	m->first = addvariable(m->first, type, varname, &ans);
+	m->first = addvariable(m->first, type, varname, &ans, m->level);
 	return ans;
 }
 
-mapnodepointer addvariable(mapnodepointer mp, int type, char* varname, int* ans)
+mapnodepointer addvariable(mapnodepointer mp, int type, char* varname, int* ans, int level)
 {
 	if(mp == NULL)
 	{
@@ -25,6 +30,7 @@ mapnodepointer addvariable(mapnodepointer mp, int type, char* varname, int* ans)
 		node->type = type;
 		node->varname = varname;
 		node->next = NULL;
+		node->level = level;
 		return node;
 	}
 
@@ -42,7 +48,7 @@ mapnodepointer addvariable(mapnodepointer mp, int type, char* varname, int* ans)
 		}
 	}
 
-	mp->next = addvariable(mp->next, type, varname, ans);
+	mp->next = addvariable(mp->next, type, varname, ans, level);
 
 	return mp;
 }
@@ -63,4 +69,38 @@ int checktype(map* m, char* varname)
 	}
 
 	return -1;
+}
+
+void newblock(map* m)
+{
+	(m->level)++;
+}
+
+void quitlevel(map* m)
+{
+	if(m->level < 0)
+	{
+		return;
+	}
+
+	m->first = deletenodes(m->first, m->level);
+
+	(m->level)--; 
+}
+
+mapnodepointer deletenodes(mapnodepointer mp, int level)
+{
+	if(mp == NULL)
+	{
+		return NULL;
+	}
+
+	if(mp->level == level)
+	{
+		return NULL;
+	}
+
+	mp->next = deletenodes(mp->next, level);
+
+	return mp;
 }
