@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "map.h"
 
 map* newmap()
@@ -103,4 +104,16 @@ mapnodepointer deletenodes(mapnodepointer mp, int level)
 	mp->next = deletenodes(mp->next, level);
 
 	return mp;
+}
+
+void printmap(map* m)
+{
+	printf("The map:\n");
+
+	mapnodepointer mnp = m->first;
+
+	while(m != NULL)
+	{
+		printf("%s: %d\n", mnp->varname, mnp->type);
+	}
 }
