@@ -8,4 +8,4 @@ clean:
 all:
 	flex scanner.l
 	yacc -d parser.y
-	$(GCC) -o compiler lex.yy.c y.tab.c map.c map.h -ly $(GCCFLAGS)
+	$(GCC) -o compiler lex.yy.c y.tab.c map.c map.h util.c util.h -ly $(GCCFLAGS)

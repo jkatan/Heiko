@@ -35,13 +35,15 @@ while										{return WHILE_START;}
 if											{return IF_START;}
 else										{return ELSE_START;}
 number										{return NUMBER;}
-string										{return STRING; printf("es un string");}
-array										{return ARRAY;}
+string										{return STRING;}
+vector										{return VECTOR;}
 matrix										{return MATRIX;}
 constant									{return CONSTANT;}
-\[											{return STARTING_BRACKET;}
-\]											{return ENDING_BRACKET;}
+[\[]										{return STARTING_BRACKET;}
+[\]]										{return ENDING_BRACKET;}
 =											{return ASSIGN_OPERATOR;}
+\{											{return OPEN_VECTOR;}
+\}											{return CLOSE_VECTOR;}
 \"(\\.|[^\\"])*\"							{yylval.str = strdup(yytext); return STRING_VALUE;}
 [a-zA-Z_][a-zA-Z0-9_]* 						{yylval.str = strdup(yytext); return VAR_NAME;}
 (-?([0-9]+)(\.[0-9]+)?)|(-?\.?[0-9]+)		{yylval.str = strdup(yytext); return NUMBER_VALUE;}
