@@ -18,6 +18,8 @@ int vector_size;
 int matrix_prev_vec_size;
 int matrix_current_vec_size;
 
+int variable_type;
+
 map *var_types;
 
 struct vector {
@@ -74,8 +76,10 @@ main()
 %type  <str> elseblock
 %type  <str> condition
 %type  <str> whileblock
+%type  <str> varname_arithmetic
+%type <str> assign_var_name
 
-%token STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST   ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE
+%token STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE
 
 %start block
 
@@ -110,7 +114,7 @@ delimiter:
 
 vardecl: datatype initvar
         {
-            addvariabletomap(var_types, $1, $2);   
+            variable_type = -1;   
         }
         | constant_decl datatype initvar
         ;
@@ -120,14 +124,14 @@ constant_decl:
         ;
 
 datatype:
-        NUMBER { printf("\tfloat "); $$ = NUMBER_TYPE; }
-        | STRING { printf("\tString "); $$ = STRING_TYPE; }
-        | VECTOR { printf("\tfloat[] "); $$ = VECTOR_TYPE; }
-        | MATRIX { printf("\tfloat[][] "); $$ = MATRIX_TYPE; }
+        NUMBER { printf("\tfloat "); variable_type = NUMBER_TYPE; }
+        | STRING { printf("\tString "); variable_type = STRING_TYPE; }
+        | VECTOR { printf("\tfloat[] "); variable_type = VECTOR_TYPE; }
+        | MATRIX { printf("\tfloat[][] "); variable_type = MATRIX_TYPE; }
         ;
 
 initvar: 
-        VAR_NAME ASSIGN_OPERATOR arithmetic 
+        assign_var_name ASSIGN_OPERATOR varname_arithmetic 
         {
             printf("%s = %s", $1, $3); 
             free($3); 
@@ -135,7 +139,7 @@ initvar:
             strcpy($$, $1);
             free($1); 
         }
-        | VAR_NAME 
+        | assign_var_name 
         { 
             printf("%s", $1); 
             $$ = malloc(strlen($1));
@@ -144,8 +148,12 @@ initvar:
         }
         ;
 
-arithmetic:
-        arithmetic SUM_CARACHTER term 
+assign_var_name:
+        VAR_NAME { addvariabletomap(var_types, variable_type, $1); $$ = $1; }
+        ;
+
+varname_arithmetic:
+        varname_arithmetic SUM_CARACHTER VAR_NAME 
         {
         	if(checktype(var_types, $1) == checktype(var_types, $3))
         	{
@@ -173,11 +181,11 @@ arithmetic:
         		}
         	}
         	else
-        	{
+        	{  
         		yyerror("Not a valid arithmetic operation");
         	} 
         }
-        |  arithmetic MULTIPLY_CARACHTER term 
+        |  varname_arithmetic MULTIPLY_CARACHTER VAR_NAME 
         { 
         	if(checktype(var_types, $1) == checktype(var_types, $3))
         	{
@@ -205,7 +213,7 @@ arithmetic:
         		yyerror("Not a valid arithmetic operation");
         	}
         }
-        |  arithmetic SUBSTRACTION_CARACHTER term 
+        |  varname_arithmetic SUBSTRACTION_CARACHTER VAR_NAME 
         {
         	if(checktype(var_types, $1) == checktype(var_types, $3))
         	{
@@ -233,7 +241,7 @@ arithmetic:
         		yyerror("Not a valid arithmetic operation");
         	} 
         }
-        |  arithmetic DIVISION_CARACHTER term 
+        |  varname_arithmetic DIVISION_CARACHTER VAR_NAME 
         {
         	if(checktype(var_types, $1) == checktype(var_types, $3) && checktype(var_types, $1) == NUMBER_TYPE)
         	{
@@ -245,7 +253,7 @@ arithmetic:
         		yyerror("Not a valid arithmetic operation");
         	}
         }
-        | term { $$ = $1;}
+        | VAR_NAME { $$ = $1; }
         ;
 
 term:   
