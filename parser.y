@@ -42,8 +42,12 @@ main()
 %token <str> STRING_VALUE
 %type  <str> arithmetic 
 %type  <str> term
+%type  <str> ifblock
+%type  <str> elseblock
+%type  <str> condition
+%type  <str> whileblock
 
-%token TOKHEAT STATE TOKTARGET TOKTEMPERATURE STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST STARTING_BRACKET ENDING_BRACKET ASSIGN_OPERATOR CONSTANT QUOTE
+%token TOKHEAT STATE TOKTARGET TOKTEMPERATURE STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST STARTING_BRACKET ENDING_BRACKET ASSIGN_OPERATOR CONSTANT QUOTE TRUE FALSE
 
 %start block
 
@@ -68,6 +72,10 @@ program_end:
 instruction: 
         vardecl delimiter
         | vardecl delimiter instruction
+        | ifblock instruction
+        | ifblock
+        | whileblock instruction
+        | whileblock
         ;
 
 delimiter:
@@ -204,5 +212,22 @@ term:
     |  STRING_VALUE { $$ = $1; }
     |  ARRAY { $$ = $1; }
     |  MATRIX { $$ = $1; }
+    ;
+
+condition:		TRUE  {printf("true");}
+			|	FALSE {printf("false");}
+			|	NOT_SYMBOL condition {printf("!");}
+	;
+
+ifblock:		IF_START condition block {printf("if");}
+			|	IF_START condition block elseblock {printf("if");}
+	;
+
+elseblock:		ELSE_START block {printf("else");}
+			|	ELSE_START ifblock {printf("else");}
+	;
+
+whileblock:		WHILE_START block {printf("while");}
+	;		
 
 %%
