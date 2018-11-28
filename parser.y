@@ -5,10 +5,10 @@
 #include "util.h"
 #include "map.h"
 
-#define NUMBER_TYPE 1
-#define STRING_TYPE 2
-#define VECTOR_TYPE 3
-#define MATRIX_TYPE 4
+#define NUMBER_TYPE 0
+#define STRING_TYPE 1
+#define VECTOR_TYPE 2
+#define MATRIX_TYPE 3
 
 char **vector_initializator;
 int vector_index;
@@ -52,6 +52,7 @@ main()
     int datatype;
 }
 
+
 %token <str> VAR_NAME
 %token <str> NUMBER_VALUE
 %token <str> STRING
@@ -69,8 +70,12 @@ main()
 %type  <str> matrix_elements
 %type <varname> initvar
 %type <datatype> datatype;
+%type  <str> ifblock
+%type  <str> elseblock
+%type  <str> condition
+%type  <str> whileblock
 
-%token TOKHEAT STATE TOKTARGET TOKTEMPERATURE STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST   ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR
+%token STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST   ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE
 
 %start block
 
@@ -84,17 +89,19 @@ program_start:
         { 
             printf("public static void main(int argc, String[] args) \n{\n"); 
             var_types = newmap();
-            var_types->level = 0;
+            newblock(var_types);
         }
         ;
 
 program_end:
-        ENDING_BLOCK_SYMBOL { printf("}\n"); }
+        ENDING_BLOCK_SYMBOL { printf("}\n"); quitlevel(var_types);}
         ;
 
 instruction: 
         | vardecl delimiter instruction
         | initvar delimiter instruction
+        | ifblock instruction
+        | whileblock instruction
         ;
 
 delimiter:
@@ -139,24 +146,104 @@ initvar:
 
 arithmetic:
         arithmetic SUM_CARACHTER term 
-        { 
-            $$ = malloc(strlen($1) + strlen($3) + 4);
-            sprintf($$, "%s + %s", $1, $3);
+        {
+        	if(checktype(var_types, $1) == checktype(var_types, $3))
+        	{
+        		switch(checktype(var_types, $1))
+        		{
+        			case(NUMBER_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + 4);
+            			sprintf($$, "%s + %s", $1, $3);
+        				break;
+        			case(STRING_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + 4);
+            			sprintf($$, "%s + %s", $1, $3);
+        				break;
+        			case(VECTOR_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("sumarrays(, )") + 1);
+        				sprintf($$, "sumarrays(%s, %s)", $1, $3);
+        				break;
+        			case(MATRIX_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("summatrix(, )") + 1);
+        				sprintf($$, "summatrix(%s, %s)", $1, $3);
+        				break;
+        			default:
+        				yyerror("Not a valid arithmetic operation");
+        				break;
+        		}
+        	}
+        	else
+        	{
+        		yyerror("Not a valid arithmetic operation");
+        	} 
         }
         |  arithmetic MULTIPLY_CARACHTER term 
         { 
-            $$ = malloc(strlen($1) + strlen($3) + 4);
-            sprintf($$, "%s * %s", $1, $3);
+        	if(checktype(var_types, $1) == checktype(var_types, $3))
+        	{
+        		switch(checktype(var_types, $1))
+        		{
+        			case(NUMBER_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + 4);
+            			sprintf($$, "%s * %s", $1, $3);
+        				break;
+        			case(VECTOR_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("multarrays(, )") + 1);
+        				sprintf($$, "multarrays(%s, %s)", $1, $3);
+        				break;
+        			case(MATRIX_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("multmatrix(, )") + 1);
+        				sprintf($$, "multmatrix(%s, %s)", $1, $3);
+        				break;
+        			default:
+        				yyerror("Not a valid arithmetic operation");
+        				break;
+        		}
+        	}
+        	else
+        	{
+        		yyerror("Not a valid arithmetic operation");
+        	}
         }
         |  arithmetic SUBSTRACTION_CARACHTER term 
         {
-            $$ = malloc(strlen($1) + strlen($3) + 4);
-            sprintf($$, "%s - %s", $1, $3);
+        	if(checktype(var_types, $1) == checktype(var_types, $3))
+        	{
+        		switch(checktype(var_types, $1))
+        		{
+        			case(NUMBER_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + 4);
+            			sprintf($$, "%s - %s", $1, $3);
+        				break;
+        			case(VECTOR_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("subarrays(, )") + 1);
+        				sprintf($$, "subarrays(%s, %s)", $1, $3);
+        				break;
+        			case(MATRIX_TYPE):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("submatrix(, )") + 1);
+        				sprintf($$, "submatrix(%s, %s)", $1, $3);
+        				break;
+        			default:
+        				yyerror("Not a valid arithmetic operation");
+        				break;
+        		}
+        	}
+        	else
+        	{
+        		yyerror("Not a valid arithmetic operation");
+        	} 
         }
         |  arithmetic DIVISION_CARACHTER term 
         {
-            $$ = malloc(strlen($1) + strlen($3) + 4);
-            sprintf($$, "%s / %s", $1, $3);
+        	if(checktype(var_types, $1) == checktype(var_types, $3) && checktype(var_types, $1) == NUMBER_TYPE)
+        	{
+            	$$ = malloc(strlen($1) + strlen($3) + 4);
+            	sprintf($$, "%s / %s", $1, $3);	
+        	}
+        	else
+        	{
+        		yyerror("Not a valid arithmetic operation");
+        	}
         }
         | term { $$ = $1;}
         ;
@@ -295,4 +382,19 @@ vector_elem:
         vector_index++;
     }
     ;
-%%
+
+condition:      TRUE  {printf("true");}
+            |   FALSE {printf("false");}
+            |   NOT_SYMBOL condition {printf("!");}
+    ;
+
+ifblock:        IF_START condition block {printf("if");}
+            |   IF_START condition block elseblock {printf("if");}
+    ;
+
+elseblock:      ELSE_START block {printf("else");}
+            |   ELSE_START ifblock {printf("else");}
+    ;
+
+whileblock:     WHILE_START block {printf("while");}
+    ;       

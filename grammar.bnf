@@ -35,8 +35,11 @@
 					 |	<arithmetic> "COMMA"
 
 <ifblock>		::=		"IF_START" <condition> <block>	
-					 | 	"IF_START" <condition> <block> "ELSE_START" <block>
-					 |	"IF_START" <condition> <block> "ELSE_START" <ifblock>
+					 | 	"IF_START" <condition> <block> <elseblock>
+					 |	"IF_START" <condition> <block> <elseblock>
+
+<elseblock>		::=	 	"ELSE_START" <block>
+					 |	"ELSE_START" <ifblock>
 
 <whileblock>	::=		"WHILE_START" <condition> <block>
 
