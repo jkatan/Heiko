@@ -1,6 +1,14 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include "map.h"
+
+#define NUM_VAL 0
+#define STRING_VAL 1
+#define ARRAY_VAL 2
+#define MATRIX_VAL 3
+
+map* m;
 
 void yyerror(const char *str)
 {
@@ -25,6 +33,7 @@ main()
     char *str;
 }
 
+
 %token <str> VAR_NAME
 %token <str> NUMBER_VALUE
 %token <str> STRING
@@ -44,11 +53,16 @@ block:
         ;
 
 program_start:
-        STARTING_BLOCK_SYMBOL { printf("public static void main(int argc, String[] args) \n{\n"); }
+        STARTING_BLOCK_SYMBOL 
+        { 
+        	printf("public static void main(int argc, String[] args) \n{\n"); 
+        	m = newmap(); 
+       		newblock(m);
+       	}
         ;
 
 program_end:
-        ENDING_BLOCK_SYMBOL { printf("}\n"); }
+        ENDING_BLOCK_SYMBOL { printf("}\n"); quitlevel(m);}
         ;
 
 instruction: 
@@ -82,24 +96,104 @@ initvar:
 
 arithmetic:
         arithmetic SUM_CARACHTER term 
-        { 
-            $$ = malloc(strlen($1) + strlen($3) + 4);
-            sprintf($$, "%s + %s", $1, $3);
+        {
+        	if(checktype(m, $1) == checktype(m, $3))
+        	{
+        		switch(checktype(m, $1))
+        		{
+        			case(NUM_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + 4);
+            			sprintf($$, "%s + %s", $1, $3);
+        				break;
+        			case(STRING_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + 4);
+            			sprintf($$, "%s + %s", $1, $3);
+        				break;
+        			case(ARRAY_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("sumarrays(, )") + 1);
+        				sprintf($$, "sumarrays(%s, %s)", $1, $3);
+        				break;
+        			case(MATRIX_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("summatrix(, )") + 1);
+        				sprintf($$, "summatrix(%s, %s)", $1, $3);
+        				break;
+        			default:
+        				yyerror("Not a valid arithmetic operation");
+        				break;
+        		}
+        	}
+        	else
+        	{
+        		yyerror("Not a valid arithmetic operation");
+        	} 
         }
         |  arithmetic MULTIPLY_CARACHTER term 
         { 
-            $$ = malloc(strlen($1) + strlen($3) + 4);
-            sprintf($$, "%s * %s", $1, $3);
+        	if(checktype(m, $1) == checktype(m, $3))
+        	{
+        		switch(checktype(m, $1))
+        		{
+        			case(NUM_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + 4);
+            			sprintf($$, "%s * %s", $1, $3);
+        				break;
+        			case(ARRAY_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("multarrays(, )") + 1);
+        				sprintf($$, "multarrays(%s, %s)", $1, $3);
+        				break;
+        			case(MATRIX_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("multmatrix(, )") + 1);
+        				sprintf($$, "multmatrix(%s, %s)", $1, $3);
+        				break;
+        			default:
+        				yyerror("Not a valid arithmetic operation");
+        				break;
+        		}
+        	}
+        	else
+        	{
+        		yyerror("Not a valid arithmetic operation");
+        	}
         }
         |  arithmetic SUBSTRACTION_CARACHTER term 
         {
-            $$ = malloc(strlen($1) + strlen($3) + 4);
-            sprintf($$, "%s - %s", $1, $3);
+        	if(checktype(m, $1) == checktype(m, $3))
+        	{
+        		switch(checktype(m, $1))
+        		{
+        			case(NUM_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + 4);
+            			sprintf($$, "%s - %s", $1, $3);
+        				break;
+        			case(ARRAY_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("subarrays(, )") + 1);
+        				sprintf($$, "subarrays(%s, %s)", $1, $3);
+        				break;
+        			case(MATRIX_VAL):
+        				$$ = malloc(strlen($1) + strlen($3) + strlen("submatrix(, )") + 1);
+        				sprintf($$, "submatrix(%s, %s)", $1, $3);
+        				break;
+        			default:
+        				yyerror("Not a valid arithmetic operation");
+        				break;
+        		}
+        	}
+        	else
+        	{
+        		yyerror("Not a valid arithmetic operation");
+        	} 
         }
         |  arithmetic DIVISION_CARACHTER term 
         {
-            $$ = malloc(strlen($1) + strlen($3) + 4);
-            sprintf($$, "%s / %s", $1, $3);
+        	if(checktype(m, $1) == checktype(m, $3) && checktype(m, $1) == NUM_VAL)
+        	{
+            	$$ = malloc(strlen($1) + strlen($3) + 4);
+            	sprintf($$, "%s / %s", $1, $3);	
+        	}
+        	else
+        	{
+        		yyerror("Not a valid arithmetic operation");
+        	}
         }
         | term { $$ = $1; }
         ;
