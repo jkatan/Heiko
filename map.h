@@ -32,5 +32,6 @@
 	void newblock(map* m);
 	void quitlevel(map* m);
 	mapnodepointer deletenodes(mapnodepointer mp, int level);
+	void printmap(map* m);
 
 #endif

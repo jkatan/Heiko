@@ -84,8 +84,10 @@ main()
 %type <str> num_arithmetic
 %type <str> string_arithmetic
 %type <str> right_num
+%type <str> op_parenthesis
+%type <str> cl_parenthesis
 
-%token STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE
+%token STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL
 
 %start block
 
@@ -556,9 +558,22 @@ vector_elem:
 condition:      TRUE  {printf("true");}
             |   FALSE {printf("false");}
             |   NOT_SYMBOL condition {printf("!");}
+            |   op_parenthesis condition OR_SYMBOL condition cl_parenthesis {printf(" || ");}
+            |   op_parenthesis condition AND_SYMBOL condition cl_parenthesis {printf(" && ");}
+            |   op_parenthesis condition XOR_SYMBOL condition cl_parenthesis {printf(" ^ ");}
+            |   op_parenthesis varname_arithmetic IS_EQUALS_SYMBOL varname_arithmetic cl_parenthesis {printf(" == ");}
+            |   op_parenthesis varname_arithmetic IS_NOT_EQUALS_SYMBOL varname_arithmetic cl_parenthesis {printf(" != ");}
+            |   op_parenthesis varname_arithmetic GREATER_THAN_SYMBOL varname_arithmetic cl_parenthesis {printf(" > ");}
+            |   op_parenthesis varname_arithmetic GREATER_EQUALS_THAN_SYMBOL varname_arithmetic cl_parenthesis {printf(" >= ");}
+            |   op_parenthesis varname_arithmetic LESS_THAN_SYMBOL varname_arithmetic cl_parenthesis {printf(" < ");}
+            |   op_parenthesis varname_arithmetic LESS_EQUAL_THAN_SYMBOL varname_arithmetic cl_parenthesis {printf(" <= ");}
     ;
 
-ifblock:        IF_START condition block {printf("if");}
+op_parenthesis: START_PARENTHESIS {printf("(");}
+
+cl_parenthesis: END_PARENTHESIS {printf(")");}
+
+ifblock:        IF_START condition  block {printf("if");}
             |   IF_START condition block elseblock {printf("if");}
     ;
 
