@@ -1,4 +1,6 @@
 start
-string v1;
-string v3 = v1 + v1;
+
+number n1 = 9 + 8 - 6 / 19.5 * .1;
+string s1 = "hola" + "chai" + "lala";
+
 end

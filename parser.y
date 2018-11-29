@@ -19,6 +19,7 @@ int matrix_prev_vec_size;
 int matrix_current_vec_size;
 
 int variable_type;
+int left_type;
 
 map *var_types;
 
@@ -63,7 +64,6 @@ main()
 %token <str> STRING_VALUE
 %token <str> STARTING_BRACKET
 %token <str> ENDING_BRACKET
-%type  <str> arithmetic 
 %type  <str> term
 %type  <str> vector_elem
 %type  <str> vector_decl
@@ -78,6 +78,12 @@ main()
 %type  <str> whileblock
 %type  <str> varname_arithmetic
 %type <str> assign_var_name
+%type <str> assign_var_name_first_time
+%type <str> varname_arithmetic_right_side
+%type <str> value_arithmetic
+%type <str> num_arithmetic
+%type <str> string_arithmetic
+%type <str> right_num
 
 %token STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE
 
@@ -103,7 +109,7 @@ program_end:
 
 instruction: 
         | vardecl delimiter instruction
-        | initvar delimiter instruction
+        | reinitvar delimiter instruction
         | ifblock instruction
         | whileblock instruction
         ;
@@ -112,11 +118,8 @@ delimiter:
         DELIMITER { printf(";\n"); }
         ;
 
-vardecl: datatype initvar
-        {
-            variable_type = -1;   
-        }
-        | constant_decl datatype initvar
+vardecl: datatype initvar { variable_type = -1; }
+        | constant_decl datatype initvar { variable_type = -1; }
         ;
 
 constant_decl: 
@@ -131,33 +134,97 @@ datatype:
         ;
 
 initvar: 
-        assign_var_name ASSIGN_OPERATOR varname_arithmetic 
+        assign_var_name_first_time ASSIGN_OPERATOR varname_arithmetic 
         {
             printf("%s = %s", $1, $3); 
             free($3); 
-            $$ = malloc(strlen($1));
-            strcpy($$, $1);
             free($1); 
         }
-        | assign_var_name 
+        | assign_var_name_first_time ASSIGN_OPERATOR value_arithmetic
+        {
+            printf("%s = %s", $1, $3); 
+            free($3); 
+            free($1); 
+        }
+        | assign_var_name_first_time ASSIGN_OPERATOR term
+        {
+            printf("%s = %s", $1, $3); 
+            free($3); 
+            free($1); 
+        }
+        | assign_var_name_first_time 
         { 
             printf("%s", $1); 
-            $$ = malloc(strlen($1));
-            strcpy($$, $1);
             free($1); 
+        }
+        ;
+
+reinitvar:
+    assign_var_name ASSIGN_OPERATOR varname_arithmetic 
+        {
+            printf("%s = %s", $1, $3); 
+            free($3); 
+            free($1); 
+        }
+    |   assign_var_name ASSIGN_OPERATOR value_arithmetic
+        {
+            printf("%s = %s", $1, $3); 
+            free($3); 
+            free($1); 
+        }
+    |   assign_var_name ASSIGN_OPERATOR term
+        {
+            printf("%s = %s", $1, $3); 
+            free($3); 
+            free($1);
+        }
+    | assign_var_name 
+        { 
+            printf("%s", $1); 
+            free($1); 
+        }
+        ;
+
+assign_var_name_first_time:
+        VAR_NAME 
+        {   
+            int left_var_type = checktype(var_types, $1);
+
+            if(left_var_type == -1)
+            {
+                char* var = malloc(strlen($1));
+                strcpy(var, $1);
+                addvariabletomap(var_types, variable_type, var);
+            }
+            else
+            {
+                yyerror("variable already exists");
+            } 
         }
         ;
 
 assign_var_name:
-        VAR_NAME { addvariabletomap(var_types, variable_type, $1); $$ = $1; }
+        VAR_NAME 
+        {   
+            int left_var_type = checktype(var_types, $1);
+
+            if(left_var_type == -1)
+            {
+                yyerror("variable does not exist");
+            }
+            else
+            {
+                variable_type = left_var_type;
+            } 
+        }
         ;
 
 varname_arithmetic:
-        varname_arithmetic SUM_CARACHTER VAR_NAME 
+        varname_arithmetic SUM_CARACHTER varname_arithmetic_right_side 
         {
-        	if(checktype(var_types, $1) == checktype(var_types, $3))
+        	if(left_type == checktype(var_types, $3) && left_type == variable_type)
         	{
-        		switch(checktype(var_types, $1))
+        		switch(left_type)
         		{
         			case(NUMBER_TYPE):
         				$$ = malloc(strlen($1) + strlen($3) + 4);
@@ -187,9 +254,9 @@ varname_arithmetic:
         }
         |  varname_arithmetic MULTIPLY_CARACHTER VAR_NAME 
         { 
-        	if(checktype(var_types, $1) == checktype(var_types, $3))
+        	if(left_type == checktype(var_types, $3) && left_type == variable_type)
         	{
-        		switch(checktype(var_types, $1))
+        		switch(left_type)
         		{
         			case(NUMBER_TYPE):
         				$$ = malloc(strlen($1) + strlen($3) + 4);
@@ -214,10 +281,10 @@ varname_arithmetic:
         	}
         }
         |  varname_arithmetic SUBSTRACTION_CARACHTER VAR_NAME 
-        {
-        	if(checktype(var_types, $1) == checktype(var_types, $3))
+        {            
+            if(left_type == checktype(var_types, $3) && left_type == variable_type)
         	{
-        		switch(checktype(var_types, $1))
+        		switch(left_type)
         		{
         			case(NUMBER_TYPE):
         				$$ = malloc(strlen($1) + strlen($3) + 4);
@@ -243,7 +310,7 @@ varname_arithmetic:
         }
         |  varname_arithmetic DIVISION_CARACHTER VAR_NAME 
         {
-        	if(checktype(var_types, $1) == checktype(var_types, $3) && checktype(var_types, $1) == NUMBER_TYPE)
+        	if(left_type == checktype(var_types, $3) && left_type == NUMBER_TYPE && left_type == variable_type)
         	{
             	$$ = malloc(strlen($1) + strlen($3) + 4);
             	sprintf($$, "%s / %s", $1, $3);	
@@ -253,20 +320,110 @@ varname_arithmetic:
         		yyerror("Not a valid arithmetic operation");
         	}
         }
-        | VAR_NAME { $$ = $1; }
+        | VAR_NAME 
+        { 
+            if(checktype(var_types, $1) == -1)
+            {
+                yyerror("variable does not exist");
+            }
+
+            $$ = malloc(strlen($1)); 
+            strcpy($$, $1);
+            left_type = checktype(var_types, $1);
+            free($1);
+        }
         ;
 
-term:   
-    VAR_NAME { $$ = $1; }
-    |  NUMBER_VALUE 
-    { 
+varname_arithmetic_right_side:
+    VAR_NAME
+    {
+            if(checktype(var_types, $1) == -1)
+            {
+                yyerror("variable does not exist");
+            }
+
+            $$ = malloc(strlen($1)); 
+            strcpy($$, $1);
+            left_type = checktype(var_types, $1);
+            free($1);
+    }
+
+value_arithmetic:
+    num_arithmetic
+    | string_arithmetic
+    ;
+
+num_arithmetic:
+     num_arithmetic SUM_CARACHTER right_num 
+        {     
+         $$ = malloc(strlen($1) + strlen($3) + 4);
+         sprintf($$, "%s + %s", $1, $3);
+        }
+     | num_arithmetic MULTIPLY_CARACHTER right_num 
+        { 
+         $$ = malloc(strlen($1) + strlen($3) + 4);
+         sprintf($$, "%s * %s", $1, $3);
+        }
+     | num_arithmetic SUBSTRACTION_CARACHTER right_num 
+        {
+         $$ = malloc(strlen($1) + strlen($3) + 4);
+         sprintf($$, "%s - %s", $1, $3);
+        }
+     | num_arithmetic DIVISION_CARACHTER right_num 
+        {
+        $$ = malloc(strlen($1) + strlen($3) + 4);
+        sprintf($$, "%s / %s", $1, $3);
+        }
+    |  NUMBER_VALUE
+        {
+            if(variable_type != NUMBER_TYPE)
+            {
+                yyerror("incompatible variable type");
+            }
+            $$ = malloc(strlen($1) + 2); 
+            strcpy($$, $1);
+            strcat($$, "f");
+        }
+    ;
+
+right_num:
+    NUMBER_VALUE
+    {
+        if(variable_type != NUMBER_TYPE)
+        {
+            yyerror("incompatible variable type");
+        }
+
         $$ = malloc(strlen($1) + 2); 
         strcpy($$, $1);
         strcat($$, "f");
     }
-    |  STRING_VALUE { $$ = $1; }
-    |  vector_decl 
+    ;
+
+string_arithmetic:
+        string_arithmetic SUM_CARACHTER STRING_VALUE 
+            {     
+             $$ = malloc(strlen($1) + strlen($3) + 4);
+             sprintf($$, "%s + %s", $1, $3);
+            }
+        | STRING_VALUE
+            {
+                if(variable_type != STRING_TYPE)
+                {
+                    yyerror("incompatible variable type");
+                }
+                $$ = $1;
+            }
+            ;
+
+term:   
+    vector_decl 
     { 
+        if(variable_type != VECTOR_TYPE)
+        {
+            yyerror("invalid type");
+        }
+
         $$ = malloc(strlen($1) + strlen("new float[] ")); 
         strcpy($$, "new float[] "); 
         strcat($$, $1);
@@ -275,6 +432,11 @@ term:
     }
     |  matrix_decl 
     { 
+        if(variable_type != MATRIX_TYPE)
+        {
+            yyerror("invalid type");
+        }
+
         $$ = malloc(strlen($1) + strlen("new float[][] {}"));
         strcpy($$, "new float[][] {");
         strcat($$, $1);
