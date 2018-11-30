@@ -108,6 +108,7 @@ program_start:
         START_BLOCK 
         { 
             start_blocks++;
+            printf("public class Heiko{\n");
             printf("public static void main(String[] args) \n{\n"); 
             var_types = newmap();
             newblock(var_types);
@@ -118,6 +119,7 @@ program_end:
         END_BLOCK 
         { 
             end_blocks++; 
+            printf("}\n");
             printf("}\n"); 
             quitlevel(var_types); 
 
