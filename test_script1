@@ -1,6 +1,4 @@
 start
 number a;
-number b;
-number c = a + b;
-print c;
+number b = a;
 end

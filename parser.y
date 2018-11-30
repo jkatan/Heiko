@@ -267,7 +267,7 @@ assign_var_name:
 varname_arithmetic:
         varname_arithmetic SUM_CARACHTER varname_arithmetic_right_side 
         {
-        	if(left_type == right_type && left_type == variable_type)
+        	if(left_type == right_type && left_type == variable_type && isinitialized(var_types, $1) && isinitialized(var_types, $3))
         	{
         		switch(left_type)
         		{
@@ -299,7 +299,7 @@ varname_arithmetic:
         }
         |  varname_arithmetic MULTIPLY_CARACHTER varname_arithmetic_right_side 
         { 
-        	if(left_type == right_type && left_type == variable_type)
+        	if(left_type == right_type && left_type == variable_type && isinitialized(var_types, $1) && isinitialized(var_types, $3))
         	{
         		switch(left_type)
         		{
@@ -327,7 +327,7 @@ varname_arithmetic:
         }
         |  varname_arithmetic SUBSTRACTION_CARACHTER varname_arithmetic_right_side 
         {            
-            if(left_type == right_type && left_type == variable_type)
+            if(left_type == right_type && left_type == variable_type && isinitialized(var_types, $1) && isinitialized(var_types, $3))
         	{
         		switch(left_type)
         		{
@@ -355,7 +355,7 @@ varname_arithmetic:
         }
         |  varname_arithmetic DIVISION_CARACHTER varname_arithmetic_right_side 
         {
-        	if(left_type == right_type && left_type == NUMBER_TYPE && left_type == variable_type)
+        	if(left_type == right_type && left_type == NUMBER_TYPE && left_type == variable_type && isinitialized(var_types, $1) && isinitialized(var_types, $3))
         	{
             	$$ = malloc(strlen($1) + strlen($3) + 4);
             	sprintf($$, "%s / %s", $1, $3);	
@@ -367,9 +367,9 @@ varname_arithmetic:
         }
         | VAR_NAME 
         { 
-            if(checktype(var_types, $1) == -1)
+            if(checktype(var_types, $1) == -1 || !isinitialized(var_types, $1))
             {
-                yyerror("variable does not exist");
+                yyerror("variable does not exist or is not initialized");
             }
 
             $$ = malloc(strlen($1)); 
@@ -382,9 +382,9 @@ varname_arithmetic:
 varname_arithmetic_right_side:
     VAR_NAME
     {
-            if(checktype(var_types, $1) == -1)
+            if(checktype(var_types, $1) == -1 || !isinitialized(var_types, $1))
             {
-                yyerror("variable does not exist");
+                yyerror("variable does not exist or is not initialized");
             }
             else
             {
@@ -785,25 +785,34 @@ start_while:
 printvar:   var_print
     ;
 
-var_print:  PRINT VAR_NAME { switch(checktype(var_types, $2))
+var_print:  PRINT VAR_NAME {
+                            if(!isinitialized(var_types, $2))
                             {
+                                yyerror("Variable is not initialized");
+                            } 
+                            else
+                            {
+                                switch(checktype(var_types, $2))
+                                {
+    
+                                    case(NUMBER_TYPE):
+                                        printf("System.out.println(%s)", $2);
+                                        break;
+    
+                                    case(STRING_TYPE):
+                                        printf("System.out.println(%s)", $2);
+                                        break;
+                                    case(VECTOR_TYPE):
+                                        printf("printarray(%s)", $2);
+                                        break;
+                                    case(MATRIX_TYPE):
+                                        printf("printmatrix(%s)", $2);
+                                        break;
+                                    default:
+                                        yyerror("Variable doesn't exist");
+                                        break;
+                            }
 
-                            case(NUMBER_TYPE):
-                                printf("System.out.println(%s)", $2);
-                                break;
-
-                            case(STRING_TYPE):
-                                printf("System.out.println(%s)", $2);
-                                break;
-                            case(VECTOR_TYPE):
-                                printf("printarray(%s)", $2);
-                                break;
-                            case(MATRIX_TYPE):
-                                printf("printmatrix(%s)", $2);
-                                break;
-                            default:
-                                yyerror("Variable doesn't exist");
-                                break;
 
                         } 
                     }
