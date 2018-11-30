@@ -112,3 +112,23 @@ void printincludescanner()
 {
 	printf("import java.util.Scanner;\n");
 }
+
+void printgetelementmatrix()
+{
+	printf("public static float getelementmatrix(float[][] m, int i, int j){\nif(m.length <= i || m[0].length <= j){\nthrow new RuntimeErrorException(null);\n}\nreturn m[i][j];\n}\n");
+}
+
+void printgetelementarray()
+{
+	printf("public static float getelementarray(float[] a, int i){\nif(a.length <= i){\nthrow new RuntimeErrorException(null);\n}\nreturn a[i];\n}\n");
+}
+
+void printsetelementmatrix()
+{
+	printf("public static void setelementmatrix(float[][] m, int i, int j, float value){\nif(m.length <= i || m[0].length <= j){\nthrow new RuntimeErrorException(null);\n}\nm[i][j] = value;\n}\n");
+}
+
+void printsetelementarray()
+{
+	printf("public static void setelementarray(float[] a, int i, float value){\nif(a.length <= i){\nthrow new RuntimeErrorException(null);\n}\na[i] = value;\n}\n");
+}

@@ -16,5 +16,9 @@ void printprintarray();
 void printimportruntimeerror();
 void printscan();
 void printincludescanner();
+void printgetelementmatrix();
+void printgetelementarray();
+void printsetelementmatrix();
+void printsetelementarray();
 
 #endif
