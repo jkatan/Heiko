@@ -181,18 +181,21 @@ datatype:
 initvar: 
         assign_var_name_first_time ASSIGN_OPERATOR varname_arithmetic 
         {
+            initializevariable(var_types, $1);
             printf("%s = %s", $1, $3); 
             free($3); 
             free($1); 
         }
         | assign_var_name_first_time ASSIGN_OPERATOR value_arithmetic
         {
+            initializevariable(var_types, $1);
             printf("%s = %s", $1, $3); 
             free($3); 
             free($1); 
         }
         | assign_var_name_first_time ASSIGN_OPERATOR term
         {
+            initializevariable(var_types, $1);
             printf("%s = %s", $1, $3); 
             free($3); 
             free($1); 
@@ -207,18 +210,21 @@ initvar:
 reinitvar:
     assign_var_name ASSIGN_OPERATOR varname_arithmetic 
         {
+            initializevariable(var_types, $1);
             printf("\t%s = %s", $1, $3); 
             free($3); 
             free($1); 
         }
     |   assign_var_name ASSIGN_OPERATOR value_arithmetic
         {
+            initializevariable(var_types, $1);
             printf("\t%s = %s", $1, $3); 
             free($3); 
             free($1); 
         }
     |   assign_var_name ASSIGN_OPERATOR term
         {
+            initializevariable(var_types, $1);
             printf("\t%s = %s", $1, $3); 
             free($3); 
             free($1);
@@ -240,7 +246,6 @@ assign_var_name_first_time:
                 char* var = malloc(strlen($1));
                 strcpy(var, $1);
                 addvariabletomap(var_types, variable_type, var, 0);
-                initializevariable(var_types, $1);
             }
             else
             {
@@ -257,7 +262,6 @@ assign_var_name:
             if(left_var_type == -1)
             {
                 yyerror("variable does not exist");
-                initializevariable(var_types, $1);
             }
             else
             {
@@ -433,7 +437,6 @@ num_arithmetic:
         }
      | num_arithmetic DIVISION_CARACHTER right_num 
         {
-        initializevariable(var_types, $1);
         $$ = malloc(strlen($1) + strlen($3) + 4);
         sprintf($$, "%s / %s", $1, $3);
         }
@@ -446,7 +449,6 @@ num_arithmetic:
             $$ = malloc(strlen($1) + 2); 
             strcpy($$, $1);
             strcat($$, "f");
-            initializevariable(var_types, $1);
         }
     ;
 
