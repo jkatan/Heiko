@@ -68,6 +68,7 @@ main()
 %token <str> STRING_VALUE
 %token <str> STARTING_BRACKET
 %token <str> ENDING_BRACKET
+%token <varname> PRINT
 %type  <str> term
 %type  <str> vector_elem
 %type  <str> vector_decl
@@ -91,6 +92,8 @@ main()
 %type <str> right_num_var
 %type <str> start_num_arithmetic
 %type <str> start_while
+%type <str> var_print
+%type <str> printvar
 
 %token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL
 
@@ -105,7 +108,7 @@ program_start:
         START_BLOCK 
         { 
             start_blocks++;
-            printf("public static void main(int argc, String[] args) \n{\n"); 
+            printf("public static void main(String[] args) \n{\n"); 
             var_types = newmap();
             newblock(var_types);
         }
@@ -142,6 +145,7 @@ instruction:
         | reinitvar delimiter instruction
         | ifblock instruction
         | whileblock instruction
+        | printvar delimiter instruction
         ;
 
 delimiter:
@@ -766,3 +770,29 @@ whileblock:     start_while condition block
 start_while:
     WHILE_START { printf("while"); }
     ;
+
+printvar:   var_print
+    ;
+
+var_print:  PRINT { switch(checktype(var_types,$1))
+                            {
+
+                            case(NUMBER_TYPE):
+                                printf("System.out.println(%s);\n", $1);
+                                break;
+
+                            case(STRING_TYPE):
+                                printf("System.out.println(%s);\n", $1);
+                                break;
+                            case(VECTOR_TYPE):
+                                printf("printarray(%s);\n", $1);
+                                break;
+                            case(MATRIX_TYPE):
+                                printf("printmatrix(%s);\n", $1);
+                                break;
+                            default:
+                                yyerror("Variable doesn't exist");
+                                break;
+
+                        } 
+                    }

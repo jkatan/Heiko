@@ -43,6 +43,7 @@ string										{return STRING;}
 vector										{return VECTOR;}
 matrix										{return MATRIX;}
 constant									{return CONSTANT;}
+print                                       {return PRINT;}
 [\[]										{return STARTING_BRACKET;}
 [\]]										{return ENDING_BRACKET;}
 =											{return ASSIGN_OPERATOR;}
