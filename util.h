@@ -13,5 +13,6 @@ void printsubmatrix();
 void printmultimatrix();
 void printprintmatrix();
 void printprintarray();
+void printimportruntimeerror();
 
 #endif

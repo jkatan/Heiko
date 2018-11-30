@@ -68,7 +68,7 @@ main()
 %token <str> STRING_VALUE
 %token <str> STARTING_BRACKET
 %token <str> ENDING_BRACKET
-%token <varname> PRINT
+%token <str> PRINT
 %type  <str> term
 %type  <str> vector_elem
 %type  <str> vector_decl
@@ -108,10 +108,19 @@ program_start:
         START_BLOCK 
         { 
             start_blocks++;
+            printimportruntimeerror();
             printf("public class Heiko{\n");
-            printf("public static void main(String[] args) \n{\n"); 
             var_types = newmap();
             newblock(var_types);
+            printsumarrays();
+            printsubarrays();
+            printmultiarrays();
+            printsummatrix();
+            printsubmatrix();
+            printmultimatrix();
+            printprintmatrix();
+            printprintarray();
+            printf("public static void main(String[] args) \n{\n"); 
         }
         ;
 
@@ -776,21 +785,21 @@ start_while:
 printvar:   var_print
     ;
 
-var_print:  PRINT { switch(checktype(var_types,$1))
+var_print:  PRINT VAR_NAME { switch(checktype(var_types, $2))
                             {
 
                             case(NUMBER_TYPE):
-                                printf("System.out.println(%s);\n", $1);
+                                printf("System.out.println(%s)", $2);
                                 break;
 
                             case(STRING_TYPE):
-                                printf("System.out.println(%s);\n", $1);
+                                printf("System.out.println(%s)", $2);
                                 break;
                             case(VECTOR_TYPE):
-                                printf("printarray(%s);\n", $1);
+                                printf("printarray(%s)", $2);
                                 break;
                             case(MATRIX_TYPE):
-                                printf("printmatrix(%s);\n", $1);
+                                printf("printmatrix(%s)", $2);
                                 break;
                             default:
                                 yyerror("Variable doesn't exist");
@@ -798,3 +807,4 @@ var_print:  PRINT { switch(checktype(var_types,$1))
 
                         } 
                     }
+    ;

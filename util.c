@@ -68,7 +68,7 @@ void printsubarrays()
 
 void printmultiarrays()
 {
-	printf("public static float multiarrays(float[] arr1, float[] arr2){\nfloat ret = 0;\nfor(int i = 0; i < Math.min(arr1.length, arr2.length); i++){\nret += (arr1[i] * arr2[i]);\n}\nreturn ret;\n}\n");
+	printf("public static float multarrays(float[] arr1, float[] arr2){\nfloat ret = 0;\nfor(int i = 0; i < Math.min(arr1.length, arr2.length); i++){\nret += (arr1[i] * arr2[i]);\n}\nreturn ret;\n}\n");
 }
 
 void printsummatrix()
@@ -83,7 +83,7 @@ void printsubmatrix()
 
 void printmultimatrix()
 {
-	printf("public static float[][] multimatrix(float[][] m1, float[][] m2){\nfloat[][] ret = new float[m1.length][m2[0].length];\nif(m1.length != m2[0].length){\nthrow new RuntimeErrorException(null);\n}\nfor(int i = 0; i < m1.length; i++){\nfor(int j = 0; j < m2[0].length; j++){\nfor(int k = 0; k < m2.length; k++){\nret[i][j] += m1[i][k] * m2[k][j];\n}\n}\n}\nreturn ret;\n}\n");
+	printf("public static float[][] multmatrix(float[][] m1, float[][] m2){\nfloat[][] ret = new float[m1.length][m2[0].length];\nif(m1.length != m2[0].length){\nthrow new RuntimeErrorException(null);\n}\nfor(int i = 0; i < m1.length; i++){\nfor(int j = 0; j < m2[0].length; j++){\nfor(int k = 0; k < m2.length; k++){\nret[i][j] += m1[i][k] * m2[k][j];\n}\n}\n}\nreturn ret;\n}\n");
 }
 
 void printprintmatrix()
@@ -96,4 +96,9 @@ void printprintarray()
 
 	printf("%s","public static void printarray(float[] arr){\nfor(int i = 0; i < arr.length; i++){\nSystem.out.print(arr[i]);\nif(i != arr.length - 1){\nSystem.out.print(\", \");\n}\n}\nSystem.out.println(\"\");\n}\n");
 
+}
+
+void printimportruntimeerror()
+{
+	printf("import javax.management.RuntimeErrorException;\n");
 }
