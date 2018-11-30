@@ -20,6 +20,7 @@ int matrix_current_vec_size;
 
 int variable_type;
 int left_type;
+int right_type;
 
 map *var_types;
 
@@ -29,6 +30,9 @@ struct vector {
     int size;
     int max_size;
 };
+
+int start_blocks;
+int end_blocks;
 
 void yyerror(const char *str)
 {
@@ -72,9 +76,6 @@ main()
 %type  <str> matrix_elements
 %type <varname> initvar
 %type <datatype> datatype;
-%type  <str> ifblock
-%type  <str> elseblock
-%type  <str> condition
 %type  <str> whileblock
 %type  <str> varname_arithmetic
 %type <str> assign_var_name
@@ -86,19 +87,24 @@ main()
 %type <str> right_num
 %type <str> op_parenthesis
 %type <str> cl_parenthesis
+%type <str> num_var_arithmetic
+%type <str> right_num_var
+%type <str> start_num_arithmetic
+%type <str> start_while
 
-%token STARTING_BLOCK_SYMBOL ENDING_BLOCK_SYMBOL DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL
+%token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL
 
-%start block
+%start starting_block
 
 %%
-block: 
+starting_block: 
         program_start instruction program_end
         ;
 
 program_start:
-        STARTING_BLOCK_SYMBOL 
+        START_BLOCK 
         { 
+            start_blocks++;
             printf("public static void main(int argc, String[] args) \n{\n"); 
             var_types = newmap();
             newblock(var_types);
@@ -106,8 +112,30 @@ program_start:
         ;
 
 program_end:
-        ENDING_BLOCK_SYMBOL { printf("}\n"); quitlevel(var_types);}
+        END_BLOCK 
+        { 
+            end_blocks++; 
+            printf("}\n"); 
+            quitlevel(var_types); 
+
+            if(start_blocks != end_blocks)
+            {
+                yyerror("block indentation error");
+            }
+        }
         ;
+
+block:
+    start_block instruction end_block
+    ;
+
+start_block: 
+    START_BLOCK { start_blocks++; newblock(var_types); printf("\n{\n"); }
+    ;
+
+end_block: 
+    END_BLOCK { end_blocks++; quitlevel(var_types); printf("}\n"); }
+    ;
 
 instruction: 
         | vardecl delimiter instruction
@@ -164,25 +192,25 @@ initvar:
 reinitvar:
     assign_var_name ASSIGN_OPERATOR varname_arithmetic 
         {
-            printf("%s = %s", $1, $3); 
+            printf("\t%s = %s", $1, $3); 
             free($3); 
             free($1); 
         }
     |   assign_var_name ASSIGN_OPERATOR value_arithmetic
         {
-            printf("%s = %s", $1, $3); 
+            printf("\t%s = %s", $1, $3); 
             free($3); 
             free($1); 
         }
     |   assign_var_name ASSIGN_OPERATOR term
         {
-            printf("%s = %s", $1, $3); 
+            printf("\t%s = %s", $1, $3); 
             free($3); 
             free($1);
         }
     | assign_var_name 
         { 
-            printf("%s", $1); 
+            printf("\t%s", $1); 
             free($1); 
         }
         ;
@@ -224,7 +252,7 @@ assign_var_name:
 varname_arithmetic:
         varname_arithmetic SUM_CARACHTER varname_arithmetic_right_side 
         {
-        	if(left_type == checktype(var_types, $3) && left_type == variable_type)
+        	if(left_type == right_type && left_type == variable_type)
         	{
         		switch(left_type)
         		{
@@ -254,9 +282,9 @@ varname_arithmetic:
         		yyerror("Not a valid arithmetic operation");
         	} 
         }
-        |  varname_arithmetic MULTIPLY_CARACHTER VAR_NAME 
+        |  varname_arithmetic MULTIPLY_CARACHTER varname_arithmetic_right_side 
         { 
-        	if(left_type == checktype(var_types, $3) && left_type == variable_type)
+        	if(left_type == right_type && left_type == variable_type)
         	{
         		switch(left_type)
         		{
@@ -282,9 +310,9 @@ varname_arithmetic:
         		yyerror("Not a valid arithmetic operation");
         	}
         }
-        |  varname_arithmetic SUBSTRACTION_CARACHTER VAR_NAME 
+        |  varname_arithmetic SUBSTRACTION_CARACHTER varname_arithmetic_right_side 
         {            
-            if(left_type == checktype(var_types, $3) && left_type == variable_type)
+            if(left_type == right_type && left_type == variable_type)
         	{
         		switch(left_type)
         		{
@@ -310,9 +338,9 @@ varname_arithmetic:
         		yyerror("Not a valid arithmetic operation");
         	} 
         }
-        |  varname_arithmetic DIVISION_CARACHTER VAR_NAME 
+        |  varname_arithmetic DIVISION_CARACHTER varname_arithmetic_right_side 
         {
-        	if(left_type == checktype(var_types, $3) && left_type == NUMBER_TYPE && left_type == variable_type)
+        	if(left_type == right_type && left_type == NUMBER_TYPE && left_type == variable_type)
         	{
             	$$ = malloc(strlen($1) + strlen($3) + 4);
             	sprintf($$, "%s / %s", $1, $3);	
@@ -343,12 +371,27 @@ varname_arithmetic_right_side:
             {
                 yyerror("variable does not exist");
             }
-
-            $$ = malloc(strlen($1)); 
-            strcpy($$, $1);
-            left_type = checktype(var_types, $1);
+            else
+            {
+                right_type = checktype(var_types, $1);
+                $$ = malloc(strlen($1)); 
+                strcpy($$, $1);
+            }
             free($1);
     }
+    | NUMBER_VALUE
+    {
+        if(left_type == NUMBER_TYPE)
+        {
+            $$ = malloc(strlen($1) + 2); 
+            strcpy($$, $1);
+            strcat($$, "f");
+            right_type = NUMBER_TYPE;
+        }
+        else
+            free($1);
+    }
+    ;
 
 value_arithmetic:
     num_arithmetic
@@ -395,10 +438,25 @@ right_num:
         {
             yyerror("incompatible variable type");
         }
-
-        $$ = malloc(strlen($1) + 2); 
-        strcpy($$, $1);
-        strcat($$, "f");
+        else
+        {
+            $$ = malloc(strlen($1) + 2); 
+            strcpy($$, $1);
+            strcat($$, "f");
+        }
+    }
+    | VAR_NAME
+    {
+            if(checktype(var_types, $1) != NUMBER_TYPE)
+            {
+                yyerror("type error");
+            }
+            else
+            {
+                $$ = malloc(strlen($1)); 
+                strcpy($$, $1);
+            }
+            free($1);
     }
     ;
 
@@ -555,31 +613,156 @@ vector_elem:
     }
     ;
 
-condition:      TRUE  {printf("true");}
-            |   FALSE {printf("false");}
-            |   NOT_SYMBOL condition {printf("!");}
-            |   op_parenthesis condition OR_SYMBOL condition cl_parenthesis {printf(" || ");}
-            |   op_parenthesis condition AND_SYMBOL condition cl_parenthesis {printf(" && ");}
-            |   op_parenthesis condition XOR_SYMBOL condition cl_parenthesis {printf(" ^ ");}
-            |   op_parenthesis varname_arithmetic IS_EQUALS_SYMBOL varname_arithmetic cl_parenthesis {printf(" == ");}
-            |   op_parenthesis varname_arithmetic IS_NOT_EQUALS_SYMBOL varname_arithmetic cl_parenthesis {printf(" != ");}
-            |   op_parenthesis varname_arithmetic GREATER_THAN_SYMBOL varname_arithmetic cl_parenthesis {printf(" > ");}
-            |   op_parenthesis varname_arithmetic GREATER_EQUALS_THAN_SYMBOL varname_arithmetic cl_parenthesis {printf(" >= ");}
-            |   op_parenthesis varname_arithmetic LESS_THAN_SYMBOL varname_arithmetic cl_parenthesis {printf(" < ");}
-            |   op_parenthesis varname_arithmetic LESS_EQUAL_THAN_SYMBOL varname_arithmetic cl_parenthesis {printf(" <= ");}
+condition:      true_statement 
+            |   false_statement  
+            |   not_statement condition
+            |   op_parenthesis condition or_statement condition cl_parenthesis 
+            |   op_parenthesis condition and_statement condition cl_parenthesis 
+            |   op_parenthesis condition xor_statement condition cl_parenthesis 
+            |   op_parenthesis num_arithmetic_statement is_equals_statement num_arithmetic_statement cl_parenthesis
+            |   op_parenthesis num_arithmetic_statement is_not_equals_statement num_arithmetic_statement cl_parenthesis
+            |   op_parenthesis num_arithmetic_statement is_greater_statement num_arithmetic_statement cl_parenthesis
+            |   op_parenthesis num_arithmetic_statement is_greater_equals_statement num_arithmetic_statement cl_parenthesis 
+            |   op_parenthesis num_arithmetic_statement is_less_statement num_arithmetic_statement cl_parenthesis
+            |   op_parenthesis num_arithmetic_statement is_less_equals_statement num_arithmetic_statement cl_parenthesis
+    ;
+
+num_arithmetic_statement:
+    start_num_arithmetic num_arithmetic { printf("%s", $2); }
+    | num_var_arithmetic { printf("%s", $1); }
+    ;
+
+start_num_arithmetic:
+    { variable_type = NUMBER_TYPE; }
+    ;
+
+num_var_arithmetic:
+     num_var_arithmetic SUM_CARACHTER right_num_var 
+        {     
+         $$ = malloc(strlen($1) + strlen($3) + 4);
+         sprintf($$, "%s + %s", $1, $3);
+        }
+     | num_var_arithmetic MULTIPLY_CARACHTER right_num_var 
+        { 
+         $$ = malloc(strlen($1) + strlen($3) + 4);
+         sprintf($$, "%s * %s", $1, $3);
+        }
+     | num_var_arithmetic SUBSTRACTION_CARACHTER right_num_var 
+        {
+         $$ = malloc(strlen($1) + strlen($3) + 4);
+         sprintf($$, "%s - %s", $1, $3);
+        }
+     | num_var_arithmetic DIVISION_CARACHTER right_num_var 
+        {
+        $$ = malloc(strlen($1) + strlen($3) + 4);
+        sprintf($$, "%s / %s", $1, $3);
+        }
+    |  VAR_NAME
+        {
+            if(checktype(var_types, $1) != NUMBER_TYPE)
+            {
+                yyerror("incompatible variable type");
+            }
+            else
+            {
+                $$ = malloc(strlen($1) + 2); 
+                strcpy($$, $1);
+            }
+        }
+    ;
+
+right_num_var:
+    VAR_NAME
+    {
+        if(checktype(var_types, $1) != NUMBER_TYPE)
+        {
+            yyerror("incompatible variable type");
+        }
+        else
+        {
+            $$ = malloc(strlen($1) + 1); 
+            strcpy($$, $1);
+        }
+    }
+    | NUMBER_VALUE
+    {
+        $$ = malloc(strlen($1) + 1); 
+        strcpy($$, $1);
+    }
+    ;
+
+
+true_statement:
+    TRUE { printf(" true "); }
+    ;
+
+false_statement:
+    FALSE { printf(" false "); }
+    ;
+
+not_statement:
+    NOT_SYMBOL { printf(" ! "); }
+    ;
+
+or_statement:
+    OR_SYMBOL { printf(" || "); }
+    ;
+
+and_statement:
+    AND_SYMBOL { printf(" && "); }
+    ;
+
+xor_statement:
+    XOR_SYMBOL { printf(" ^ "); }
+    ;
+
+is_equals_statement:
+    IS_EQUALS_SYMBOL { printf(" == "); }
+    ;
+
+is_not_equals_statement:
+    IS_NOT_EQUALS_SYMBOL { printf(" != "); }
+    ; 
+
+is_greater_statement:
+    GREATER_THAN_SYMBOL { printf(" > "); }
+    ;
+
+is_greater_equals_statement:
+    GREATER_EQUALS_THAN_SYMBOL { printf(" >= "); }
+    ;
+
+is_less_statement:
+    LESS_THAN_SYMBOL { printf(" < "); }
+    ;
+
+is_less_equals_statement:
+    LESS_EQUAL_THAN_SYMBOL { printf(" <= "); }
     ;
 
 op_parenthesis: START_PARENTHESIS {printf("(");}
 
 cl_parenthesis: END_PARENTHESIS {printf(")");}
 
-ifblock:        IF_START condition  block {printf("if");}
-            |   IF_START condition block elseblock {printf("if");}
+ifblock:        start_if condition block
+            |   start_if condition block elseblock
     ;
 
-elseblock:      ELSE_START block {printf("else");}
-            |   ELSE_START ifblock {printf("else");}
+start_if:
+    IF_START { printf("if"); }
     ;
 
-whileblock:     WHILE_START block {printf("while");}
+elseblock:      start_else block 
+            |   start_else ifblock
+    ;
+
+start_else:
+    ELSE_START { printf("else"); }
+    ;
+
+whileblock:     start_while condition block
     ;       
+
+start_while:
+    WHILE_START { printf("while"); }
+    ;

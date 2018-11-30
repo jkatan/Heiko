@@ -1,6 +1,21 @@
 start
+	number counter = 0;
+	number top_limit = 100;
+	number flag = -1;
 
-number n1 = 9 + 8 - 6 / 19.5 * .1;
-string s1 = "hola" + "chai" + "lala";
+	while((counter lt top_limit) and ((flag eq -1) or (flag eq -2)))
+	start
+		counter = counter + 1;
 
+		if((counter ge 50) or (counter - 5 ge 45))
+		start
+			flag = 1;
+		end
+
+		else
+		
+		start
+			counter = counter * 2;
+		end
+	end
 end

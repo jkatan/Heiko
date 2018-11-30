@@ -10,14 +10,15 @@
 %option noyywrap
 
 digit		[0-9]
-boolean		[true|false]
 
 %%
 
-start										{return STARTING_BLOCK_SYMBOL;}
-end											{return ENDING_BLOCK_SYMBOL;}
+start										{return START_BLOCK;}
+end											{return END_BLOCK;}
 ;											{return DELIMITER;}
 \(											{return START_PARENTHESIS;}
+true										{return TRUE;}
+false										{return FALSE;}
 \)											{return END_PARENTHESIS;}
 \,											{return COMMA;}
 eq											{return IS_EQUALS_SYMBOL;}
@@ -27,7 +28,10 @@ ge											{return GREATER_EQUALS_THAN_SYMBOL;}
 lt											{return LESS_THAN_SYMBOL;}
 le											{return LESS_EQUAL_THAN_SYMBOL;}
 not											{return NOT_SYMBOL;}
-\+											{return SUM_CARACHTER;}
+and											{return AND_SYMBOL;}
+or 											{return OR_SYMBOL;}
+xor 										{return XOR_SYMBOL;}
+" + "										{return SUM_CARACHTER;}
 \*											{return MULTIPLY_CARACHTER;}
 \-											{return SUBSTRACTION_CARACHTER;}
 \/											{return DIVISION_CARACHTER;}
@@ -51,5 +55,4 @@ constant									{return CONSTANT;}
 \n
 [ \n]+
 [ \t]+
-
 %%
