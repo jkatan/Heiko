@@ -1,4 +1,5 @@
 start
 number a;
+a = 5;
 number b = a;
 end

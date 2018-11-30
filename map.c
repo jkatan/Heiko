@@ -11,18 +11,18 @@ map* newmap()
 	return m;
 }
 
-int addvariabletomap(map* m, int type, char* varname)
+int addvariabletomap(map* m, int type, char* varname, int final)
 {
 	if(m->level < 0)
 	{
 		return FAILURE;
 	}
 	int ans;
-	m->first = addvariable(m->first, type, varname, &ans, m->level);
+	m->first = addvariable(m->first, type, varname, &ans, m->level, final);
 	return ans;
 }
 
-mapnodepointer addvariable(mapnodepointer mp, int type, char* varname, int* ans, int level)
+mapnodepointer addvariable(mapnodepointer mp, int type, char* varname, int* ans, int level, int final)
 {
 	if(mp == NULL)
 	{
@@ -33,24 +33,17 @@ mapnodepointer addvariable(mapnodepointer mp, int type, char* varname, int* ans,
 		node->next = NULL;
 		node->level = level;
 		node->initialized = 0;
+		node->final = final;
 		return node;
 	}
 
 	if(strcmp((const char*) varname, (const char*) mp->varname) == 0)
 	{
-		if(mp->type != type)
-		{
-			*ans = FAILURE;
-			return mp;
-		}
-		else
-		{
-			*ans = SUCCESS;
-			return mp;
-		}
+		*ans = FAILURE;
+		return mp;
 	}
 
-	mp->next = addvariable(mp->next, type, varname, ans, level);
+	mp->next = addvariable(mp->next, type, varname, ans, level, final);
 
 	return mp;
 }
@@ -146,7 +139,26 @@ int initializevariable(map* m, char* varname)
 			mn->initialized = 1;
 			return 1;
 		}
+
+		mn = mn->next;
 	}
 
 	return 0;
+}
+
+int isconst(map* m, char* varname)
+{
+	mapnodepointer mn = m->first;
+
+	while(mn != NULL)
+	{
+		if(strcmp(mn->varname, varname) == 0)
+		{
+			return mn->final;
+		}
+
+		mn = mn->next;
+	}
+
+	return -1;
 }

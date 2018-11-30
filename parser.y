@@ -198,7 +198,7 @@ initvar:
             free($1); 
         }
         | assign_var_name_first_time 
-        { 
+        {
             printf("%s", $1); 
             free($1); 
         }
@@ -239,7 +239,8 @@ assign_var_name_first_time:
             {
                 char* var = malloc(strlen($1));
                 strcpy(var, $1);
-                addvariabletomap(var_types, variable_type, var);
+                addvariabletomap(var_types, variable_type, var, 0);
+                initializevariable(var_types, $1);
             }
             else
             {
@@ -256,6 +257,7 @@ assign_var_name:
             if(left_var_type == -1)
             {
                 yyerror("variable does not exist");
+                initializevariable(var_types, $1);
             }
             else
             {
@@ -415,12 +417,12 @@ value_arithmetic:
 
 num_arithmetic:
      num_arithmetic SUM_CARACHTER right_num 
-        {     
+        { 
          $$ = malloc(strlen($1) + strlen($3) + 4);
          sprintf($$, "%s + %s", $1, $3);
         }
      | num_arithmetic MULTIPLY_CARACHTER right_num 
-        { 
+        {
          $$ = malloc(strlen($1) + strlen($3) + 4);
          sprintf($$, "%s * %s", $1, $3);
         }
@@ -431,6 +433,7 @@ num_arithmetic:
         }
      | num_arithmetic DIVISION_CARACHTER right_num 
         {
+        initializevariable(var_types, $1);
         $$ = malloc(strlen($1) + strlen($3) + 4);
         sprintf($$, "%s / %s", $1, $3);
         }
@@ -443,6 +446,7 @@ num_arithmetic:
             $$ = malloc(strlen($1) + 2); 
             strcpy($$, $1);
             strcat($$, "f");
+            initializevariable(var_types, $1);
         }
     ;
 
@@ -477,7 +481,7 @@ right_num:
 
 string_arithmetic:
         string_arithmetic SUM_CARACHTER STRING_VALUE 
-            {     
+            {   
              $$ = malloc(strlen($1) + strlen($3) + 4);
              sprintf($$, "%s + %s", $1, $3);
             }

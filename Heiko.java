@@ -131,6 +131,7 @@ System.out.println("");
 public static void main(String[] args) 
 {
 	float a;
+	a = 5f;
 	float b = a;
 }
 }
