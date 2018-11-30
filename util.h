@@ -14,5 +14,7 @@ void printmultimatrix();
 void printprintmatrix();
 void printprintarray();
 void printimportruntimeerror();
+void printscan();
+void printincludescanner();
 
 #endif

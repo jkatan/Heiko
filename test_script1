@@ -1,5 +1,4 @@
 start
-number a;
-a = 5;
-number b = a;
+string x = read;
+print x;
 end

@@ -102,3 +102,13 @@ void printimportruntimeerror()
 {
 	printf("import javax.management.RuntimeErrorException;\n");
 }
+
+void printscan()
+{
+	printf("public static String scan(){\n Scanner s = new Scanner(System.in);\n return s.nextLine();\n}\n");
+}
+
+void printincludescanner()
+{
+	printf("import java.util.Scanner;\n");
+}

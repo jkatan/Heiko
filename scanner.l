@@ -44,6 +44,7 @@ vector										{return VECTOR;}
 matrix										{return MATRIX;}
 constant									{return CONSTANT;}
 print                                       {return PRINT;}
+read										{return READ;}
 [\[]										{return STARTING_BRACKET;}
 [\]]										{return ENDING_BRACKET;}
 =											{return ASSIGN_OPERATOR;}

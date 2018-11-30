@@ -95,7 +95,7 @@ main()
 %type <str> var_print
 %type <str> printvar
 
-%token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL
+%token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL READ
 
 %start starting_block
 
@@ -109,6 +109,7 @@ program_start:
         { 
             start_blocks++;
             printimportruntimeerror();
+            printincludescanner();
             printf("public class Heiko{\n");
             var_types = newmap();
             newblock(var_types);
@@ -120,6 +121,7 @@ program_start:
             printmultimatrix();
             printprintmatrix();
             printprintarray();
+            printscan();
             printf("public static void main(String[] args) \n{\n"); 
         }
         ;
@@ -200,6 +202,15 @@ initvar:
             free($3); 
             free($1); 
         }
+        |  assign_var_name_first_time ASSIGN_OPERATOR READ
+            {
+                if(checktype(var_types, $1) != STRING_TYPE)
+                {
+                    yyerror("Must be String type to read from stdin");
+                }
+                initializevariable(var_types, $1);
+                printf("%s = scan()", $1);
+            }
         | assign_var_name_first_time 
         {
             printf("%s", $1); 
@@ -228,6 +239,15 @@ reinitvar:
             printf("\t%s = %s", $1, $3); 
             free($3); 
             free($1);
+        }
+    |   assign_var_name ASSIGN_OPERATOR READ
+        {
+            if(checktype(var_types, $1) != STRING_TYPE)
+            {
+                yyerror("Must be String type to read from stdin");
+            }
+            initializevariable(var_types, $1);
+            printf("%s = scan()", $1);
         }
     | assign_var_name 
         { 
@@ -823,5 +843,3 @@ var_print:  PRINT VAR_NAME {
                         } 
                     }
     ;
-
-
