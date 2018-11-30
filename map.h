@@ -13,6 +13,7 @@
 	{
 		int level;
 		int type;
+		int initialized;
 		char* varname;
 		mapnodepointer next;
 
@@ -32,6 +33,8 @@
 	void newblock(map* m);
 	void quitlevel(map* m);
 	mapnodepointer deletenodes(mapnodepointer mp, int level);
+	int isinitialized(map* m, char* varname);
+	int initializevariable(map* m, char* varname);
 	void printmap(map* m);
 
 #endif

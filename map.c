@@ -32,6 +32,7 @@ mapnodepointer addvariable(mapnodepointer mp, int type, char* varname, int* ans,
 		node->varname = varname;
 		node->next = NULL;
 		node->level = level;
+		node->initialized = 0;
 		return node;
 	}
 
@@ -116,4 +117,36 @@ void printmap(map* m)
 	{
 		printf("%s: %d\n", mnp->varname, mnp->type);
 	}
+}
+
+int isinitialized(map* m, char* varname)
+{
+	mapnodepointer mn = m->first;
+
+	while(mn != NULL)
+	{
+		if(strcmp(mn->varname, varname) == 0)
+		{
+			return mn->initialized;
+		}
+		mn = mn->next;
+	}
+
+	return -1;
+}
+
+int initializevariable(map* m, char* varname)
+{
+	mapnodepointer mn = m->first;
+
+	while(mn != NULL)
+	{
+		if(strcmp(mn->varname, varname) == 0)
+		{
+			mn->initialized = 1;
+			return 1;
+		}
+	}
+
+	return 0;
 }

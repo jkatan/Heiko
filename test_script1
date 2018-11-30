@@ -1,6 +1,6 @@
 start
-matrix v1;
-matrix v2;
-matrix v3 = v1 * v2;
-print v3;
+number a;
+number b;
+number c = a + b;
+print c;
 end
