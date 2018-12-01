@@ -1115,8 +1115,8 @@ array_get_operation: VAR_NAME DOT GET START_PARENTHESIS value END_PARENTHESIS
                     break;
 
                 case(STRING_TYPE):
-                    $$ = malloc(strlen($1) + strlen($5) + strlen("Character.toString((int)().charAt((int)()))"));
-                    sprintf($$, "Character.toString((int)(%s).charAt((int)(%s)))", $1, $5);
+                    $$ = malloc(strlen($1) + strlen($5) + strlen("Character.toString(.charAt((int)()))"));
+                    sprintf($$, "Character.toString(%s.charAt((int)(%s)))", $1, $5);
                     get_string_operation = 1;
                     free($1);
                     free($5);
@@ -1140,8 +1140,8 @@ matrix_get_operation: VAR_NAME DOT GET START_PARENTHESIS value COMMA value END_P
         }
         else if(checktype(var_types, $1) == MATRIX_TYPE)
         {
-                    $$ = malloc(strlen($1) + strlen($5) + strlen($7) + strlen("getelementmatrix(,,)"));
-                    sprintf($$, "getelementmatrix(%s,%s,%s)", $1, $5, $7);
+                    $$ = malloc(strlen($1) + strlen($5) + strlen($7) + strlen("getelementmatrix(,(int)(),(int)())"));
+                    sprintf($$, "getelementmatrix(%s,(int)(%s),(int)(%s))", $1, $5, $7);
                     get_number_operation = 1;
                     free($1);
                     free($5);
@@ -1163,7 +1163,7 @@ matrix_set_operation:
         }
         else if(checktype(var_types, $1) == MATRIX_TYPE)
         {
-            printf("setelementmatrix(%s, %s, %s, %s)", $1, $5, $7, $9);
+            printf("setelementmatrix(%s, (int)(%s), (int)(%s), (int)(%s))", $1, $5, $7, $9);
             get_number_operation = 1;
             free($5);
             free($1);
@@ -1209,7 +1209,7 @@ string_set_operation: VAR_NAME DOT SET START_PARENTHESIS value COMMA set_string_
         }
         else if(checktype(var_types, $1) == STRING_TYPE)
         {
-            printf("setstring(%s, (int)(%s), %s)", $1, $5, $7);
+            printf("%s = setstring(%s, (int)(%s), %s)",$1, $1, $5, $7);
             get_string_operation = 1;
             free($5);
             free($1);
