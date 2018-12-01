@@ -1,0 +1,34 @@
+
+/* Matrix and vector operations example */
+
+start
+
+	/* Matrix multiplication */
+
+	print "---- MATRIX MULTIPLICATION EXAMPLE ----";
+
+	print "Matrix m1 is: ";
+	matrix m1 = [{1,2},{3,4}];
+	print m1;
+
+	matrix m2 = m1 * m1;
+	print "m1 * m1 is: ";
+	print m2;
+
+	/* Vector multiplication */
+
+	print "---- VECTOR MULTIPLICATION EXAMPLE ----";
+	
+	print "v1 is ";
+	vector v1 = {1,2};
+	print v1;
+
+	print "v2 is ";
+	vector v2 = {.5,.5};
+	print v2;
+
+	number scalar_product = v1 * v2;
+	print "v1 * v2 is";
+	print scalar_product;
+
+end
