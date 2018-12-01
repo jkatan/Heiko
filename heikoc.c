@@ -12,7 +12,14 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	executeHeikoCompiler(argv[1]);
+	if(access(argv[1], F_OK) != -1) 
+	{
+    	executeHeikoCompiler(argv[1]);
+	} 
+	else 
+	{
+	    printf("File %s does not exist\n", argv[1]);
+	}
 }
 
 void executeHeikoCompiler(char* filename)
