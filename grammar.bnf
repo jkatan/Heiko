@@ -1,76 +1,202 @@
-<block> 		::= 	"STARTING_BLOCK_SYMBOL" <instruction> "ENDING_BLOCK_SYMBOL"
+<starting_block>::=	 						<program_start> <instruction> <program_end>
 
-<instruction>	::=  	<vardecl>"DELIMITER"
-					 |	<vardecl> "DELIMITER" <instruction>
-					 |	<operation> "DELIMITER"
-					 |	<operation> "DELIMITER" <instruction>
-					 |	<ifblock>
-					 |	<ifblock> <instruction>
-					 |	<whileblock>
-					 |	<whileblock> <instruction>
-					 |	<initvar> "DELIMITER"
-					 |	<initvar> "DELIMITER" <instruction>
+<program_start>::=							"START_BLOCK"
 
-<vardecl>		::=		<datatype> <initvar>
-					 |	<datatype> "VAR_NAME"
-					 |	"CONSTANT" <datatype> <initvar>
+<program_end>::=							"END_BLOCK"
 
-<initvar>		::=		"VAR_NAME" "ASSIGN_OPERATOR" <arithmetic>
+block::=									<start_block> <instruction> <end_block>
 
-<arithmetic> 	::=		<arithmetic> "SUM_CARACHTER" <arithmetic>
-					 |	<arithmetic> "MULTIPLY_CARACHTER" <arithmetic>
-					 |	<arithmetic> "SUBSTRACTION_CARACHTER" <arithmetic>
-					 |	<arithmetic> "DIVISION_CARACHTER" <arithmetic>
-					 | 	"VAR_NAME"
-					 |	"NUMBER"
-					 |	"STRING"
-					 |	"ARRAY"
-					 |	"MATRIX"
-					 |	<dereference>
+<start_block>::= 							"START_BLOCK"
 
-<operation>		::=		"OPERATION_NAME" "START_PARENTHESIS" "END_PARENTHENSIS"
-					 |	"OPERATION_NAME" "START_PARENTHESIS" <param> "END_PARENTHENSIS"
+<end_block>::= 								"END_BLOCK"
 
-<param>			::=		<arithmetic>
-					 |	<arithmetic> "COMMA"
+<instruction>::=  		
+											| <vardecl> <delimiter> <instruction>
+        									| <reinitvar> <delimiter> <instruction>
+        									| <ifblock> <instruction>
+        									| <whileblock> <instruction>
+        									| <printvar> <delimiter> <instruction>
+        									| <array_set_operation> <delimiter> <instruction>
+        									| <matrix_set_operation> <delimiter> <instruction>
 
-<ifblock>		::=		"IF_START" <condition> <block>	
-					 | 	"IF_START" <condition> <block> <elseblock>
-					 |	"IF_START" <condition> <block> <elseblock>
+<delimiter>::=								"DELIMITER"
 
-<elseblock>		::=	 	"ELSE_START" <block>
-					 |	"ELSE_START" <ifblock>
+<vardecl>::=	 							<datatype> <initvar>
+											| <constant_decl> <datatype> <initvarconst>
 
-<whileblock>	::=		"WHILE_START" <condition> <block>
+<constant_decl>::= 							"CONSTANT"
 
-<condition>		::=		"BOOLEAN"
-					 |	"START_PARENTHESIS" <arithmetic> "GREATER_THAN_SYMBOL" <arithmetic> "END_PARENTHENSIS"
-					 |	"START_PARENTHESIS" <arithmetic> "LESS_THAN_SYMBOL" <arithmetic> "END_PARENTHENSIS"	
-					 |	"START_PARENTHESIS" <arithmetic> "GREATER_OR_EQUAL_THAN_SYMBOL" <arithmetic> "END_PARENTHENSIS"
-					 |	"START_PARENTHESIS" <arithmetic> "LESS_OR_EQUAL_THAN_SYMBOL" <arithmetic> "END_PARENTHENSIS"
-					 |	"START_PARENTHESIS" <arithmetic> "IS_EQUALS_SYMBOL" <arithmetic> "END_PARENTHENSIS"
-					 |	"NOT_SYMBOL" <condition> 
-					 |	"START_PARENTHESIS" <arithmetic> "IS_NOT_EQUALS" <arithmetic> "END_PARENTHENSIS"
-					 |	"START_PARENTHESIS" <condition> "OR_SYMBOL" <condition> "END_PARENTHENSIS"
-					 |	"START_PARENTHESIS" <condition>	"AND_SYMBOL" <condition> "END_PARENTHENSIS"
-					 |	"START_PARENTHESIS" <condition> "XOR_SYMBOL" <condition> "END_PARENTHENSIS"
+<datatype>::=								"NUMBER"
+											| "STRING"
+											| "VECTOR"
+											| "MATRIX"
 
-<datatype>		::=		"NUMBER"
-					 |	"STRING"
-					 |	"ARRAY"
-					 |	"MATRIX"
+<initvarconst>::=  							<assign_var_name_first_time_const> "ASSIGN_OPERATOR" <varname_arithmetic>
+											| <assign_var_name_first_time_const> "ASSIGN_OPERATOR" <value_arithmetic>
+											| <assign_var_name_first_time_const> "ASSIGN_OPERATOR" <term>
+											| <assign_var_name_first_time_const> "ASSIGN_OPERATOR" "READ"
 
-<dereference>	::=		"ARRAY" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"  
-					 |	"ARRAY" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" 
-					 |	"MATRIX" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"     
-					 |	"MATRIX" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"   
-					 |	"MATRIX" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" 
-					 |	"MATRIX" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"
-					 |	"MATRIX" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"  
-					 |	"MATRIX" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"   
-					 |	"VAR_NAME" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"
-					 |	"VAR_NAME" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"
-					 |	"VAR_NAME" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"    
-					 |	"VAR_NAME"	"STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" "STARTING_BRACKET" "NUMBER" "ENDING_BRACKET"  
-					 |	"VAR_NAME"	"STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"
-					 |	"VAR_NAME"	"STARTING_BRACKET" "NUMBER" "ENDING_BRACKET" "STARTING_BRACKET" "VAR_NAME" "ENDING_BRACKET"  
+<initvar>::=								<assign_var_name_first_time> "ASSIGN_OPERATOR" <varname_arithmetic>
+											| <assign_var_name_first_time> "ASSIGN_OPERATOR" <value_arithmetic>
+											| <assign_var_name_first_time> "ASSIGN_OPERATOR" <term>
+											| <assign_var_name_first_time> "ASSIGN_OPERATOR" "READ"
+											| <assign_var_name_first_time>
+
+<reinitvar>::=								<assign_var_name> "ASSIGN_OPERATOR" <varname_arithmetic>
+											| <assign_var_name> "ASSIGN_OPERATOR" <value_arithmetic>
+											| <assign_var_name> "ASSIGN_OPERATOR" <term>
+											| <assign_var_name> "ASSIGN_OPERATOR" "READ"
+											| <assign_var_name>
+
+<assign_var_name_first_time_const>::=		"VAR_NAME"
+
+<assign_var_name_first_time>::=				"VAR_NAME"
+
+<assign_var_name>::=						"VAR_NAME"
+
+<varname_arithmetic>::=						<varname_arithmetic> "SUM_CARACHTER" <varname_arithmetic_right_side>
+											| <varname_arithmetic> "MULTIPLY_CARACHTER" <varname_arithmetic_right_side>
+											| <varname_arithmetic> "SUBSTRACTION_CARACHTER" <varname_arithmetic_right_side>
+											| <varname_arithmetic> "DIVISION_CARACHTER" <varname_arithmetic_right_side>
+											| "VAR_NAME"
+											| <array_get_operation>
+											| <matrix_get_operation>
+
+<varname_arithmetic_right_side>::=			"VAR_NAME"
+											| "NUMBER_VALUE"
+											| "STRING_VALUE"
+											| <array_get_operation>
+											| <matrix_get_operation>
+
+<value_arithmetic>::=						<num_arithmetic>
+											| <string_arithmetic>
+
+<num_arithmetic>::=							<num_arithmetic> "SUM_CARACHTER" <right_num>
+											| <num_arithmetic> "MULTIPLY_CARACHTER" <right_num>
+											| <num_arithmetic> "SUBSTRACTION_CARACHTER" <right_num>
+											| <num_arithmetic> "DIVISION_CARACHTER" <right_num>
+											| "NUMBER_VALUE"
+
+<right_num>::= 								"NUMBER_VALUE"
+											| "VAR_NAME"
+											| <array_get_operation>
+											| <matrix_get_operation>
+
+<string_arithmetic>::=						<string_arithmetic> "SUM_CARACHTER" <right_side_string_arithmetic>
+											| "STRING_VALUE "
+
+<right_side_string_arithmetic>::=			"STRING_VALUE"
+											| <array_get_operation>
+
+<term>::=									<vector_decl>
+											| <matrix_decl>
+
+<matrix_decl>::=							"STARTING_BRACKET" <matrix_elements> "ENDING_BRACKET"
+
+<matrix_elements>::=						<matrix_element>
+
+<matrix_element>::=							<vector_decl>
+											| <matrix_element> "COMMA" <vector_decl>
+
+<vector_decl>::=							"OPEN_VECTOR" <vector_elements> "CLOSE_VECTOR"
+
+<vector_elements>::=						<vector_elem>
+
+<vector_elem>::=							"NUMBER_VALUE"
+											| <vector_elem> "COMMA" "NUMBER_VALUE"
+
+<condition>::=								<true_statement>
+											| <false_statement>
+											| <not_statement> <condition>
+											| <op_parenthesis> <condition> <or_statement> <condition> <cl_parenthesis>
+											| <op_parenthesis> <condition> <and_statement> <condition> <cl_parenthesis>
+											| <op_parenthesis> <condition> <xor_statement> <condition> <cl_parenthesis>
+											| <op_parenthesis> <num_arithmetic_statement> <is_equals_statement> <num_arithmetic_statement>          	  	<cl_parenthesis>
+											| <op_parenthesis> <num_arithmetic_statement> <is_not_equals_statement> <num_arithmetic_statement>            	<cl_parenthesis>
+											| <op_parenthesis> <num_arithmetic_statement> <is_greater_statement num_arithmetic_statement>    	          	<num_arithmetic_statement> <cl_parenthesis>
+											| <op_parenthesis> <num_arithmetic_statement> <is_greater_equals_statement num_arithmetic_statement>    	  	<num_arithmetic_statement> <cl_parenthesis>
+											| <op_parenthesis> <num_arithmetic_statement> <is_less_statement num_arithmetic_statement>                    	<num_arithmetic_statement> <cl_parenthesis>
+											| <op_parenthesis> <num_arithmetic_statement> <is_less_equals_statement num_arithmetic_statement>          	  	<num_arithmetic_statement> <cl_parenthesis>
+
+<num_arithmetic_statement>::=				<num_and_num_var_arithmetic>
+
+<num_and_num_var_arithmetic>::=				<start_num_arithmetic> <num_arithmetic>
+											| <num_var_arithmetic>
+
+<start_num_arithmetic>::=				
+
+<num_var_arithmetic>::=						<num_var_arithmetic> "SUM_CARACHTER" <right_num_var>
+											| <num_var_arithmetic> "MULTIPLY_CARACHTER" <right_num_var>
+											| <num_var_arithmetic> "SUBSTRACTION_CARACHTER" <right_num_var>
+											| <num_var_arithmetic> "DIVISION_CARACHTER" <right_num_var>
+											| "VAR_NAME"
+											| <array_get_operation>
+											| <matrix_get_operation>
+
+<right_num_var>::=							"VAR_NAME"
+											| "NUMBER_VALUE"
+											| <array_get_operation>
+											| <matrix_get_operation>
+
+<true_statement>::=							"TRUE"
+
+<false_statement>::=						"FALSE"
+
+<not_statement>::=							"NOT_SYMBOL"
+
+<or_statement>::=							"OR_SYMBOL"
+
+<and_statement>::=							"AND_SYMBOL"
+
+<xor_statement>::=							"XOR_SYMBOL"
+
+<is_equals_statement>::=					"IS_EQUALS_SYMBOL"
+
+<is_not_equals_statement>::=				"IS_NOT_EQUALS_SYMBOL"
+
+<is_greater_statement>::=					"GREATER_THAN_SYMBOL"
+
+<is_greater_equals_statement>::=			"GREATER_EQUALS_THAN_SYMBOL"
+
+<is_less_statement>::=						"LESS_THAN_SYMBOL"
+
+<is_less_equals_statement>::=				"LESS_EQUAL_THAN_SYMBOL"
+
+<op_parenthesis>::=							"START_PARENTHESIS"
+
+<cl_parenthesis>::=							"END_PARENTHESIS"
+
+<ifblock>::=								<start_if> <condition> <block>
+											| <start_if> <condition> <block> <elseblock>
+
+<start_else>::=								"ELSE_START"
+
+<whileblock>::=								<start_while> <condition> <block>
+
+<start_while>::=							"WHILE_START" 
+
+<printvar>::=   							<var_print>
+
+<var_print>::=								"PRINT" "VAR_NAME"
+											| <start_print> <string_arithmetic>
+
+<start_print>::= 							"PRINT"
+
+<array_get_operation>::=					"VAR_NAME" "DOT" "GET" "START_PARENTHESIS" <value> "END_PARENTHESIS"
+
+<matrix_get_operation>::=					"VAR_NAME" "DOT" "GET" "START_PARENTHESIS" <value> "COMMA" <value> "END_PARENTHESIS"
+
+<matrix_set_operation>::=					"VAR_NAME" "DOT" "SET" "START_PARENTHESIS" <value> "COMMA" <value> "COMMA" <value> "END_PARENTHESIS"
+
+<array_set_operation>::=					<vector_set_operation>
+											| <string_set_operation>
+
+<vector_set_operation>::= 					"VAR_NAME" "DOT" "SET" "START_PARENTHESIS" <value> "COMMA" <value> "END_PARENTHESIS"
+
+<string_set_operation>::= 					"VAR_NAME" "DOT" "SET" "START_PARENTHESIS" <value> "COMMA" <set_string_arithmetic> "END_PARENTHESIS"
+
+<set_string_arithmetic>::=					<start_string_arithmetic> <string_arithmetic>
+
+<start_string_arithmetic>::=				
+
+<value>::= 									<num_and_num_var_arithmetic> 
