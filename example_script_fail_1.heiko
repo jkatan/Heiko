@@ -1,0 +1,8 @@
+
+/* Incompatyble types on variable initialization compile error example */
+
+start
+
+string s = {1,2,3};
+
+end
