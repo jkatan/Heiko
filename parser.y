@@ -137,6 +137,10 @@ program_start:
             printprintmatrix();
             printprintarray();
             printscan();
+            printgetelementmatrix();
+            printgetelementarray();
+            printsetelementmatrix();
+            printsetelementarray();
             printf("public static void main(String[] args) \n{\n"); 
         }
         ;
