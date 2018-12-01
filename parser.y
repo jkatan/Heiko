@@ -33,6 +33,8 @@ int print_string;
 
 map *var_types;
 
+char* var_init;
+
 struct vector {
     char **elements;
     int current_index;
@@ -187,7 +189,7 @@ instruction:
         ;
 
 delimiter:
-        DELIMITER { printf(";\n"); }
+        DELIMITER { printf(";\n"); if(var_init != NULL) {initializevariable(var_types, var_init);} var_init = NULL;}
         ;
 
 vardecl: datatype initvar { variable_type = -1;}
@@ -207,21 +209,24 @@ datatype:
 
 initvarconst:  assign_var_name_first_time_const ASSIGN_OPERATOR varname_arithmetic
                 {
-                    initializevariable(var_types, $1);    
+                    var_init = malloc(strlen($1) + 1);
+                    strcpy(var_init, $1);   
                     printf("%s = %s", $1, $3); 
                     free($3); 
                     free($1); 
                 }
               | assign_var_name_first_time_const ASSIGN_OPERATOR value_arithmetic
                 {
-                    initializevariable(var_types, $1);
+                    var_init = malloc(strlen($1) + 1);
+                    strcpy(var_init, $1);
                     printf("%s = %s", $1, $3); 
                     free($3); 
                     free($1); 
                 }
               | assign_var_name_first_time_const ASSIGN_OPERATOR term
                 {
-                    initializevariable(var_types, $1);
+                    var_init = malloc(strlen($1) + 1);
+                    strcpy(var_init, $1);
                     printf("%s = %s", $1, $3); 
                     free($3); 
                     free($1); 
@@ -232,7 +237,8 @@ initvarconst:  assign_var_name_first_time_const ASSIGN_OPERATOR varname_arithmet
                     {
                         yyerror("Must be String type to read from stdin");
                     }
-                    initializevariable(var_types, $1);
+                    var_init = malloc(strlen($1) + 1);
+                    strcpy(var_init, $1);
                     printf("%s = scan()", $1);                
                 }
 
@@ -257,7 +263,8 @@ initvar:
         {
             if(!isconst(var_types, $1))
             {
-                initializevariable(var_types, $1);
+                var_init = malloc(strlen($1) + 1);
+                strcpy(var_init, $1);
                 printf("%s = %s", $1, $3); 
                 free($3); 
                 free($1); 
@@ -271,7 +278,8 @@ initvar:
         {
             if(!isconst(var_types, $1))
             {
-                initializevariable(var_types, $1);
+                var_init = malloc(strlen($1) + 1);
+                strcpy(var_init, $1);
                 printf("%s = %s", $1, $3); 
                 free($3); 
                 free($1); 
@@ -289,7 +297,8 @@ initvar:
                 }
                 else if(!isconst(var_types, $1))
                 {
-                    initializevariable(var_types, $1);
+                    var_init = malloc(strlen($1) + 1);
+                    strcpy(var_init, $1);
                     printf("%s = scan()", $1);                
                 }
                 else
@@ -310,7 +319,8 @@ reinitvar:
         {
             if(!isconst(var_types, $1))
             {
-                initializevariable(var_types, $1);
+                var_init = malloc(strlen($1) + 1);
+                strcpy(var_init, $1);
                 printf("\t%s = %s", $1, $3); 
                 free($3); 
                 free($1); 
@@ -325,7 +335,8 @@ reinitvar:
         {
             if(!isconst(var_types, $1))
             {
-                initializevariable(var_types, $1);
+                var_init = malloc(strlen($1) + 1);
+                strcpy(var_init, $1);
                 printf("\t%s = %s", $1, $3); 
                 free($3); 
                 free($1); 
@@ -339,7 +350,8 @@ reinitvar:
         {
             if(!isconst(var_types, $1))
             {
-                initializevariable(var_types, $1);
+                var_init = malloc(strlen($1) + 1);
+                strcpy(var_init, $1);
                 printf("\t%s = %s", $1, $3); 
                 free($3); 
                 free($1); 
@@ -357,7 +369,8 @@ reinitvar:
             }
             else if(!isconst(var_types, $1))
             {
-                initializevariable(var_types, $1);
+                var_init = malloc(strlen($1) + 1);
+                strcpy(var_init, $1);
                 printf("%s = scan()", $1);
             }
             else
@@ -382,7 +395,6 @@ assign_var_name_first_time_const:
                 char* var = malloc(strlen($1));
                 strcpy(var, $1);
                 addvariabletomap(var_types, variable_type, var, 1);
-                initializevariable(var_types, var);
             }
             else
             {
@@ -401,7 +413,6 @@ assign_var_name_first_time:
                 char* var = malloc(strlen($1));
                 strcpy(var, $1);
                 addvariabletomap(var_types, variable_type, var, 0);
-                initializevariable(var_types, var);
             }
             else
             {

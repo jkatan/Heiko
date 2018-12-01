@@ -1,4 +1,3 @@
 start
-constant string a = read;
-a = 6;
+number x = x + "a";
 end
