@@ -1,4 +1,0 @@
-start
-string x = read;
-print x;
-end

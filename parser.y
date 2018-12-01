@@ -29,6 +29,7 @@ int get_string_operation;
 int num_flag;
 int get_set_op_flag;
 int set_string;
+int print_string;
 
 map *var_types;
 
@@ -109,6 +110,7 @@ main()
 %type <str> set_string_arithmetic
 %type <str> vector_set_operation
 %type <str> string_set_operation
+%type <str> matrix_get_operation
 
 %token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL READ DOT GET SET
 
@@ -125,6 +127,7 @@ program_start:
             start_blocks++;
             printimportruntimeerror();
             printincludescanner();
+            printimportstringbuilder();
             printf("public class Heiko{\n");
             var_types = newmap();
             newblock(var_types);
@@ -141,6 +144,7 @@ program_start:
             printgetelementarray();
             printsetelementmatrix();
             printsetelementarray();
+            printsetstring();
             printf("public static void main(String[] args) \n{\n"); 
         }
         ;
@@ -179,6 +183,7 @@ instruction:
         | whileblock instruction
         | printvar delimiter instruction
         | array_set_operation delimiter instruction
+        | matrix_set_operation delimiter instruction
         ;
 
 delimiter:
@@ -446,6 +451,17 @@ varname_arithmetic:
                 yyerror("incompatible variable type");
             }
         }
+        | matrix_get_operation
+        {
+            if(get_number_operation == 1 && variable_type == NUMBER_TYPE)
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                left_type = NUMBER_TYPE;
+                free($1);
+            }
+        }
         ;
 
 varname_arithmetic_right_side:
@@ -509,6 +525,17 @@ varname_arithmetic_right_side:
                 yyerror("incompatible variable type");
             }
         }
+    | matrix_get_operation
+    {
+        if(get_number_operation == 1 && variable_type == NUMBER_TYPE)
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                right_type = NUMBER_TYPE;
+                free($1);
+            }
+    }
     ;
 
 value_arithmetic:
@@ -595,6 +622,22 @@ right_num:
                 yyerror("incompatible variable type");
             }
         }
+    | matrix_get_operation
+    {
+        get_set_op_flag = 1;
+
+            if(get_number_operation == 1)
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                free($1);
+            }
+            else
+            {
+                yyerror("incompatible variable type");
+            }
+    }
     ;
 
 string_arithmetic:
@@ -605,10 +648,9 @@ string_arithmetic:
             }
         | STRING_VALUE
             {
-                if(variable_type != STRING_TYPE && set_string != 1)
+                if(variable_type != STRING_TYPE && set_string != 1 && print_string != 1)
                 {
                     yyerror("incompatible variable");
-                    printf("SET STRING IS %d", set_string);
                 }
                 $$ = $1;
             }
@@ -617,7 +659,7 @@ string_arithmetic:
 right_side_string_arithmetic:
     STRING_VALUE
         {
-            if(variable_type != STRING_TYPE && set_string != 1)
+            if(variable_type != STRING_TYPE && set_string != 1 && print_string != 1)
                 {
                     yyerror("incompatible variable type");
                 }
@@ -861,6 +903,20 @@ num_var_arithmetic:
                 free($1);
             }
         }
+    | matrix_get_operation
+    {
+        if(get_number_operation != 1)
+            {
+                yyerror("incompatible variable type");
+            }
+            else
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                free($1);
+            }
+    }
     ;
 
 right_num_var:
@@ -897,6 +953,20 @@ right_num_var:
                 free($1);
             }
         }
+    | matrix_get_operation
+    {
+        if(get_number_operation != 1)
+            {
+                yyerror("incompatible variable type");
+            }
+            else
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                free($1);
+            }
+    }
     ;
 
 
@@ -1009,7 +1079,15 @@ var_print:  PRINT VAR_NAME {
 
                         } 
                     }
+            | start_print string_arithmetic
+                {
+                    printf("System.out.println(%s)", $2);
+                    print_string = 0;
+                }
     ;
+
+start_print:
+    PRINT { print_string = 1; }
 
 array_get_operation: VAR_NAME DOT GET START_PARENTHESIS value END_PARENTHESIS
     {
@@ -1023,16 +1101,16 @@ array_get_operation: VAR_NAME DOT GET START_PARENTHESIS value END_PARENTHESIS
             switch(checktype(var_types, $1))
             {
                 case(VECTOR_TYPE):
-                    $$ = malloc(strlen($5) + strlen("get_vector_index()"));
-                    sprintf($$, "get_vector_index(%s)", $5);
+                    $$ = malloc(strlen($5) + strlen($1) + strlen("getelementarray(,(int)())"));
+                    sprintf($$, "getelementarray(%s,(int)(%s))", $1, $5);
                     get_number_operation = 1;
                     free($1);
                     free($5);
                     break;
 
                 case(STRING_TYPE):
-                    $$ = malloc(strlen($1) + strlen($5) + strlen("Character.toString(.charAt())") + 1);
-                    sprintf($$, "Character.toString(%s.charAt(%s))", $1, $5);
+                    $$ = malloc(strlen($1) + strlen($5) + strlen("Character.toString((int)().charAt((int)()))"));
+                    sprintf($$, "Character.toString((int)(%s).charAt((int)(%s)))", $1, $5);
                     get_string_operation = 1;
                     free($1);
                     free($5);
@@ -1048,6 +1126,48 @@ array_get_operation: VAR_NAME DOT GET START_PARENTHESIS value END_PARENTHESIS
     ;
 
 matrix_get_operation: VAR_NAME DOT GET START_PARENTHESIS value COMMA value END_PARENTHESIS
+    {
+        if(!isinitialized(var_types, $1))
+        {
+            yyerror("Variable is not initialized");
+            $$ = "error";
+        }
+        else if(checktype(var_types, $1) == MATRIX_TYPE)
+        {
+                    $$ = malloc(strlen($1) + strlen($5) + strlen($7) + strlen("getelementmatrix(,,)"));
+                    sprintf($$, "getelementmatrix(%s,%s,%s)", $1, $5, $7);
+                    get_number_operation = 1;
+                    free($1);
+                    free($5);
+                    break;   
+        }
+        else
+        {
+            yyerror("incompatible type");
+        }
+    }
+    ;
+
+matrix_set_operation:
+    VAR_NAME DOT SET START_PARENTHESIS value COMMA value COMMA value END_PARENTHESIS
+    {
+        if(!isinitialized(var_types, $1))
+        {
+            yyerror("Variable is not initialized");
+        }
+        else if(checktype(var_types, $1) == MATRIX_TYPE)
+        {
+            printf("setelementmatrix(%s, %s, %s, %s)", $1, $5, $7, $9);
+            get_number_operation = 1;
+            free($5);
+            free($1);
+        }
+        else
+        {
+            yyerror("incompatible type");
+        }
+    }
+    ;
 
 array_set_operation:
     vector_set_operation
@@ -1062,7 +1182,7 @@ vector_set_operation: VAR_NAME DOT SET START_PARENTHESIS value COMMA value END_P
         }
         else if(checktype(var_types, $1) == VECTOR_TYPE)
         {
-            printf("set_vector_index(%s, %s, %s)", $1, $5, $7);
+            printf("setelementarray(%s, (int)(%s), (int)(%s))", $1, $5, $7);
             get_number_operation = 1;
             free($5);
             free($1);
@@ -1083,7 +1203,7 @@ string_set_operation: VAR_NAME DOT SET START_PARENTHESIS value COMMA set_string_
         }
         else if(checktype(var_types, $1) == STRING_TYPE)
         {
-            printf("set_string_char(%s, %s, %s)", $1, $5, $7);
+            printf("setstring(%s, (int)(%s), %s)", $1, $5, $7);
             get_string_operation = 1;
             free($5);
             free($1);

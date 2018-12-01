@@ -132,3 +132,13 @@ void printsetelementarray()
 {
 	printf("public static void setelementarray(float[] a, int i, float value){\nif(a.length <= i){\nthrow new RuntimeErrorException(null);\n}\na[i] = value;\n}\n");
 }
+
+void printimportstringbuilder()
+{
+	printf("import java.lang.StringBuilder;\n");
+}
+
+void printsetstring()
+{
+	printf("public static String setstring(String stringToModify, int index, String subString)\n{\nStringBuilder stringToReturn = new StringBuilder(stringToModify);\nstringToReturn.replace(index, index + subString.length(), subString);\nreturn stringToReturn.toString();\n}\n");
+}

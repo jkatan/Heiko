@@ -14,11 +14,13 @@ void printmultimatrix();
 void printprintmatrix();
 void printprintarray();
 void printimportruntimeerror();
+void printimportstringbuilder();
 void printscan();
 void printincludescanner();
 void printgetelementmatrix();
 void printgetelementarray();
 void printsetelementmatrix();
 void printsetelementarray();
+void printsetstring();
 
 #endif
