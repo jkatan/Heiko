@@ -22,4 +22,4 @@ Por lo tanto, si se desea compilar el compilador de Heiko, hacer "make all", y s
 
 	donde 'filename' es el archivo a compilar. Notar que el archivo "compiler" es el generado por yacc, que recibe por entrada estanar un programa escrito en heiko y deja en salida estandar su traduccion a Java. Entonces, lo que se hace con este comando es dejar en un archivo "Heiko.java" la salida del compilador, y luego se compila ese archivo en Java con el compilador de Java. Esto es lo que hace el programa heikoc internamente.
 
-4. Ejecucion de scripts escritos en Heiko: Por ultimo, si se desea ejecutar un script de heiko ya compilado, escribir "java Heiko". Heiko es el nombre de la clase en Java que contiene el codigo traducido a partir de Heiko. 
+4. Ejecucion de scripts escritos en Heiko: Por ultimo, si se desea ejecutar un script de heiko ya compilado, ejecutar en la terminal "java Heiko" en la carpeta donde se compilo el script. Heiko es el nombre de la clase en Java que contiene el codigo traducido a partir de Heiko. 

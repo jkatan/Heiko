@@ -727,6 +727,10 @@ right_num:
             {
                 yyerror("type error");
             }
+            else if(!isinitialized(var_types, $1))
+            {
+                yyerror("Variable is not initialized");
+            } 
             else
             {
                 $$ = malloc(strlen($1)); 
@@ -1011,6 +1015,10 @@ num_var_arithmetic:
             {
                 yyerror("incompatible variable type");
             }
+            else if(!isinitialized(var_types, $1))
+            {
+                yyerror("Variable is not initialized");
+            } 
             else
             {
                 $$ = malloc(strlen($1) + 2); 
@@ -1053,6 +1061,10 @@ right_num_var:
         if(checktype(var_types, $1) != NUMBER_TYPE)
         {
             yyerror("incompatible variable type");
+        }
+        else if(!isinitialized(var_types, $1))
+        {
+            yyerror("Variable is not initialized");
         }
         else
         {
