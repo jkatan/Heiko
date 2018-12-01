@@ -350,7 +350,13 @@ varname_arithmetic:
         }
         |  varname_arithmetic MULTIPLY_CARACHTER varname_arithmetic_right_side 
         { 
-        	if(left_type == right_type && left_type == variable_type && isinitialized(var_types, $1) && isinitialized(var_types, $3))
+            if(variable_type == NUMBER_TYPE && left_type == VECTOR_TYPE && left_type == right_type)
+            {
+                $$ = malloc(strlen($1) + strlen($3) + strlen("multarrays(, )") + 1);
+                sprintf($$, "multarrays(%s, %s)", $1, $3);
+            }
+
+        	else if(left_type == right_type && left_type == variable_type && isinitialized(var_types, $1) && isinitialized(var_types, $3))
         	{
         		switch(left_type)
         		{
