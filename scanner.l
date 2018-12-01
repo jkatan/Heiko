@@ -32,9 +32,9 @@ and											{return AND_SYMBOL;}
 or 											{return OR_SYMBOL;}
 xor 										{return XOR_SYMBOL;}
 " + "										{return SUM_CARACHTER;}
-\*											{return MULTIPLY_CARACHTER;}
-\-											{return SUBSTRACTION_CARACHTER;}
-\/											{return DIVISION_CARACHTER;}
+" * "											{return MULTIPLY_CARACHTER;}
+" - "											{return SUBSTRACTION_CARACHTER;}
+" / "											{return DIVISION_CARACHTER;}
 while										{return WHILE_START;}
 if											{return IF_START;}
 else										{return ELSE_START;}
@@ -47,6 +47,9 @@ print                                       {return PRINT;}
 read										{return READ;}
 [\[]										{return STARTING_BRACKET;}
 [\]]										{return ENDING_BRACKET;}
+[\.]										{return DOT;}
+get 										{return GET;}
+set 										{return SET;}
 =											{return ASSIGN_OPERATOR;}
 \{											{return OPEN_VECTOR;}
 \}											{return CLOSE_VECTOR;}

@@ -1,21 +1,11 @@
 start
-	number counter = 0;
-	number top_limit = 100;
-	number flag = -1;
+	string s1 = "hola";
 
-	while((counter lt top_limit) and ((flag eq -1) or (flag eq -2)))
-	start
-		counter = counter + 1;
+	string s3 = s1.get(2);
 
-		if((counter ge 50) or (counter - 5 ge 45))
-		start
-			flag = 1;
-		end
+	string s2;
+	number n1;
+	vector v1 = {1};
 
-		else
-		
-		start
-			counter = counter * 2;
-		end
-	end
+	s1.set(3, "h" + s3.get(3));
 end

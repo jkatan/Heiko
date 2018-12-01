@@ -19,8 +19,16 @@ int matrix_prev_vec_size;
 int matrix_current_vec_size;
 
 int variable_type;
+int prev_variable_type;
 int left_type;
 int right_type;
+
+int get_number_operation;
+int get_string_operation;
+
+int num_flag;
+int get_set_op_flag;
+int set_string;
 
 map *var_types;
 
@@ -76,7 +84,6 @@ main()
 %type  <str> matrix_element
 %type  <str> matrix_elements
 %type <varname> initvar
-%type <datatype> datatype;
 %type  <str> whileblock
 %type  <str> varname_arithmetic
 %type <str> assign_var_name
@@ -94,8 +101,16 @@ main()
 %type <str> start_while
 %type <str> var_print
 %type <str> printvar
+%type <str> array_get_operation
+%type <str> array_set_operation
+%type <str> num_and_num_var_arithmetic
+%type <str> value
+%type <str> right_side_string_arithmetic
+%type <str> set_string_arithmetic
+%type <str> vector_set_operation
+%type <str> string_set_operation
 
-%token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL READ
+%token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL READ DOT GET SET
 
 %start starting_block
 
@@ -159,6 +174,7 @@ instruction:
         | ifblock instruction
         | whileblock instruction
         | printvar delimiter instruction
+        | array_set_operation delimiter instruction
         ;
 
 delimiter:
@@ -175,7 +191,7 @@ constant_decl:
 
 datatype:
         NUMBER { printf("\tfloat "); variable_type = NUMBER_TYPE; }
-        | STRING { printf("\tString "); variable_type = STRING_TYPE; }
+        | STRING { printf("\tString "); variable_type = STRING_TYPE;}
         | VECTOR { printf("\tfloat[] "); variable_type = VECTOR_TYPE; }
         | MATRIX { printf("\tfloat[][] "); variable_type = MATRIX_TYPE; }
         ;
@@ -403,6 +419,29 @@ varname_arithmetic:
             left_type = checktype(var_types, $1);
             free($1);
         }
+        | array_get_operation
+        {
+            if(get_number_operation == 1 && variable_type == NUMBER_TYPE)
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                left_type = NUMBER_TYPE;
+                free($1);
+            }
+            else if(get_string_operation == 1 && variable_type == STRING_TYPE)
+            {
+                get_string_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                left_type = STRING_TYPE;
+                free($1);
+            }
+            else
+            {
+                yyerror("incompatible variable type");
+            }
+        }
         ;
 
 varname_arithmetic_right_side:
@@ -431,7 +470,41 @@ varname_arithmetic_right_side:
         }
         else
             free($1);
+    } 
+    | STRING_VALUE
+    {
+        if(left_type == STRING_TYPE)
+        {
+            $$ = malloc(strlen($1)); 
+            strcpy($$, $1);
+            right_type = STRING_TYPE;
+        }
+        else
+            free($1);
     }
+    | array_get_operation
+        {
+            if(get_number_operation == 1 && variable_type == NUMBER_TYPE)
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                right_type = NUMBER_TYPE;
+                free($1);
+            }
+            else if(get_string_operation == 1 && variable_type == STRING_TYPE)
+            {
+                get_string_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                right_type = STRING_TYPE;
+                free($1);
+            }
+            else
+            {
+                yyerror("incompatible variable type");
+            }
+        }
     ;
 
 value_arithmetic:
@@ -462,20 +535,23 @@ num_arithmetic:
         }
     |  NUMBER_VALUE
         {
-            if(variable_type != NUMBER_TYPE)
+            if(variable_type != NUMBER_TYPE && num_flag != NUMBER_TYPE)
             {
                 yyerror("incompatible variable type");
             }
-            $$ = malloc(strlen($1) + 2); 
-            strcpy($$, $1);
-            strcat($$, "f");
+            else 
+            {
+                $$ = malloc(strlen($1) + 2); 
+                strcpy($$, $1);
+                strcat($$, "f");
+            }
         }
     ;
 
 right_num:
     NUMBER_VALUE
     {
-        if(variable_type != NUMBER_TYPE)
+        if(variable_type != NUMBER_TYPE && get_set_op_flag != 1)
         {
             yyerror("incompatible variable type");
         }
@@ -499,23 +575,64 @@ right_num:
             }
             free($1);
     }
+    | array_get_operation
+        {
+            get_set_op_flag = 1;
+
+            if(get_number_operation == 1)
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                free($1);
+            }
+            else
+            {
+                yyerror("incompatible variable type");
+            }
+        }
     ;
 
 string_arithmetic:
-        string_arithmetic SUM_CARACHTER STRING_VALUE 
+        string_arithmetic SUM_CARACHTER right_side_string_arithmetic 
             {   
              $$ = malloc(strlen($1) + strlen($3) + 4);
              sprintf($$, "%s + %s", $1, $3);
             }
         | STRING_VALUE
             {
-                if(variable_type != STRING_TYPE)
+                if(variable_type != STRING_TYPE && set_string != 1)
                 {
-                    yyerror("incompatible variable type");
+                    yyerror("incompatible variable");
+                    printf("SET STRING IS %d", set_string);
                 }
                 $$ = $1;
             }
             ;
+
+right_side_string_arithmetic:
+    STRING_VALUE
+        {
+            if(variable_type != STRING_TYPE && set_string != 1)
+                {
+                    yyerror("incompatible variable type");
+                }
+                $$ = $1;
+        }
+    | array_get_operation
+            {
+                if(get_string_operation == 1)
+                {
+                    get_string_operation = 0;
+                    $$ = malloc(strlen($1));
+                    strcpy($$, $1);
+                    free($1);
+                }
+                else
+                {
+                    yyerror("incompatible variable type");
+                }
+            }
 
 term:   
     vector_decl 
@@ -669,12 +786,28 @@ condition:      true_statement
     ;
 
 num_arithmetic_statement:
-    start_num_arithmetic num_arithmetic { printf("%s", $2); }
-    | num_var_arithmetic { printf("%s", $1); }
+    num_and_num_var_arithmetic { printf("%s", $1); }
+    ;
+
+num_and_num_var_arithmetic:
+    start_num_arithmetic num_arithmetic 
+        { 
+            num_flag = -1;
+            get_set_op_flag = 0;
+            $$ = malloc(strlen($2));
+            strcpy($$, $2);
+            free($2); 
+        }
+    | num_var_arithmetic 
+        { 
+            $$ = malloc(strlen($1)); 
+            strcpy($$, $1);
+            free($1);
+        }
     ;
 
 start_num_arithmetic:
-    { variable_type = NUMBER_TYPE; }
+    { num_flag = NUMBER_TYPE; }
     ;
 
 num_var_arithmetic:
@@ -710,6 +843,20 @@ num_var_arithmetic:
                 strcpy($$, $1);
             }
         }
+    | array_get_operation
+        {
+            if(get_number_operation != 1)
+            {
+                yyerror("incompatible variable type");
+            }
+            else
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                free($1);
+            }
+        }
     ;
 
 right_num_var:
@@ -727,9 +874,25 @@ right_num_var:
     }
     | NUMBER_VALUE
     {
-        $$ = malloc(strlen($1) + 1); 
+        $$ = malloc(strlen($1) + 2); 
         strcpy($$, $1);
+        strcat($$, "f");
+        free($1);
     }
+    | array_get_operation
+        {
+            if(get_number_operation != 1)
+            {
+                yyerror("incompatible variable type");
+            }
+            else
+            {
+                get_number_operation = 0;
+                $$ = malloc(strlen($1));
+                strcpy($$, $1);
+                free($1);
+            }
+        }
     ;
 
 
@@ -842,4 +1005,106 @@ var_print:  PRINT VAR_NAME {
 
                         } 
                     }
+    ;
+
+array_get_operation: VAR_NAME DOT GET START_PARENTHESIS value END_PARENTHESIS
+    {
+        if(!isinitialized(var_types, $1))
+        {
+            yyerror("Variable is not initialized");
+            $$ = "error";
+        }
+        else
+        {
+            switch(checktype(var_types, $1))
+            {
+                case(VECTOR_TYPE):
+                    $$ = malloc(strlen($5) + strlen("get_vector_index()"));
+                    sprintf($$, "get_vector_index(%s)", $5);
+                    get_number_operation = 1;
+                    free($1);
+                    free($5);
+                    break;
+
+                case(STRING_TYPE):
+                    $$ = malloc(strlen($1) + strlen($5) + strlen("Character.toString(.charAt())") + 1);
+                    sprintf($$, "Character.toString(%s.charAt(%s))", $1, $5);
+                    get_string_operation = 1;
+                    free($1);
+                    free($5);
+                    break;
+
+                default:
+                    yyerror("Variable doesn't exist");
+                    $$ = "error";
+                    break;
+            }
+        }
+    }
+    ;
+
+array_set_operation:
+    vector_set_operation
+    | string_set_operation
+    ;
+
+vector_set_operation: VAR_NAME DOT SET START_PARENTHESIS value COMMA value END_PARENTHESIS
+    {
+        if(!isinitialized(var_types, $1))
+        {
+            yyerror("Variable is not initialized");
+        }
+        else if(checktype(var_types, $1) == VECTOR_TYPE)
+        {
+            printf("set_vector_index(%s, %s, %s)", $1, $5, $7);
+            get_number_operation = 1;
+            free($5);
+            free($1);
+        }
+        else
+        {
+            yyerror("incompatible type");
+        }
+    }
+
+string_set_operation: VAR_NAME DOT SET START_PARENTHESIS value COMMA set_string_arithmetic END_PARENTHESIS
+    {
+        if(!isinitialized(var_types, $1))
+        {
+            yyerror("Variable is not initialized");
+            free($5);
+            free($1);
+        }
+        else if(checktype(var_types, $1) == STRING_TYPE)
+        {
+            printf("set_string_char(%s, %s, %s)", $1, $5, $7);
+            get_string_operation = 1;
+            free($5);
+            free($1);
+        }
+        else
+        {
+            yyerror("incompatible type");
+            free($5);
+            free($1);
+        }
+    }
+    ;
+
+set_string_arithmetic:
+    start_string_arithmetic string_arithmetic 
+    { 
+        set_string = 0;
+        $$ = $2; 
+    }
+
+start_string_arithmetic:
+    { set_string = 1; }
+
+value: num_and_num_var_arithmetic 
+    { 
+        $$ = malloc(strlen($1));
+        strcpy($$, $1);
+        free($1); 
+    }
     ;
