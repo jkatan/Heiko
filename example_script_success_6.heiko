@@ -1,0 +1,8 @@
+start
+
+string s1 = read;
+string s2 = read;
+string s3 = s1 + s2;
+print s3;
+
+end

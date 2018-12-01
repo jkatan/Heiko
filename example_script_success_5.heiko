@@ -1,0 +1,11 @@
+start
+
+number i = 0;
+
+while(i lt 5)
+start
+print i;
+i = i + 1;
+end
+
+end

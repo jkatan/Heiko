@@ -1,0 +1,8 @@
+start
+number x;
+number y;
+while(x > y)
+start
+y = y + 1;
+end
+end

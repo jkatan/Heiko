@@ -1,0 +1,5 @@
+start
+string s = read;
+s = s + "aaa";
+print s;
+end

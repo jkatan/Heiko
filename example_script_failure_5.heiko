@@ -1,0 +1,3 @@
+start
+number n = read;
+end
