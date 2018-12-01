@@ -1047,6 +1047,8 @@ array_get_operation: VAR_NAME DOT GET START_PARENTHESIS value END_PARENTHESIS
     }
     ;
 
+matrix_get_operation: VAR_NAME DOT GET START_PARENTHESIS value COMMA value END_PARENTHESIS
+
 array_set_operation:
     vector_set_operation
     | string_set_operation
