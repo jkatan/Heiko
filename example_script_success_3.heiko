@@ -1,0 +1,29 @@
+/* Set operations on matrix in loop, example */
+
+start
+
+	matrix m1 = [{.1,.2,.3},{-.65,-9.1,0.43},{7,6,-1}];
+
+	number row = 0;
+	number column;
+
+	print "Original m1 matrix: ";
+	print m1;
+
+	while(row lt 3)
+	start
+
+		column = 0;
+
+		while(column lt 3)
+		start
+			m1.set(row,column,0);
+			column = column + 1;
+		end
+
+		row = row + 1;
+	end
+
+	print "m1 matrix after modification: ";
+	print m1;
+end

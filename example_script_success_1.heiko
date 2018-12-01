@@ -1,0 +1,28 @@
+
+/* Strings examples */
+
+start
+
+	/* string concatenation example */
+
+	print "---- STRING CONCATENATION EXAMPLE ----";
+
+	string s1 = "hello";
+	string s2 = " ";
+	string s3 = "world";
+
+	string hello_world = s1 + s2 + s3;
+
+	print hello_world;
+
+	print "---- STRING APPEND EXAMPLE ----";
+
+	print "empty string is ";
+	string empty = "";
+	print empty;
+
+	print "modified empty string is";
+	empty.set(0, "not_empty");
+	print empty;
+
+end
