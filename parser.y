@@ -43,17 +43,15 @@ struct vector {
 int start_blocks;
 int end_blocks;
 
+int yylex();
+int yyparse();
+
 void yyerror(const char *str)
 {
         fprintf(stderr,"error: %s\n",str);
-}
- 
-int yywrap()
-{
-        return 1;
 } 
   
-main()
+int main()
 {
         yyparse();
 } 
