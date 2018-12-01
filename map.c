@@ -108,7 +108,7 @@ void printmap(map* m)
 
 	while(m != NULL)
 	{
-		printf("%s: %d\n", mnp->varname, mnp->type);
+		printf("%s: %d \n", mnp->varname, mnp->final);
 	}
 }
 

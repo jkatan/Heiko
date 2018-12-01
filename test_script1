@@ -1,0 +1,4 @@
+start
+constant string a = read;
+a = 6;
+end

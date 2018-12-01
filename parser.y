@@ -83,10 +83,12 @@ int main()
 %type  <str> matrix_element
 %type  <str> matrix_elements
 %type <varname> initvar
+%type <varname> initvarconst
 %type  <str> whileblock
 %type  <str> varname_arithmetic
 %type <str> assign_var_name
 %type <str> assign_var_name_first_time
+%type <str> assign_var_name_first_time_const
 %type <str> varname_arithmetic_right_side
 %type <str> value_arithmetic
 %type <str> num_arithmetic
@@ -110,7 +112,7 @@ int main()
 %type <str> string_set_operation
 %type <str> matrix_get_operation
 
-%token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER CONST ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL READ DOT GET SET
+%token START_BLOCK END_BLOCK DELIMITER START_PARENTHESIS END_PARENTHESIS COMMA IS_EQUALS_SYMBOL IS_NOT_EQUALS_SYMBOL GREATER_THAN_SYMBOL GREATER_EQUALS_THAN_SYMBOL LESS_THAN_SYMBOL LESS_EQUAL_THAN_SYMBOL NOT_SYMBOL SUM_CARACHTER MULTIPLY_CARACHTER SUBSTRACTION_CARACHTER DIVISION_CARACHTER WHILE_START IF_START ELSE_START NUMBER ASSIGN_OPERATOR CONSTANT QUOTE OPEN_VECTOR CLOSE_VECTOR TRUE FALSE OR_SYMBOL AND_SYMBOL XOR_SYMBOL READ DOT GET SET
 
 %start starting_block
 
@@ -188,8 +190,8 @@ delimiter:
         DELIMITER { printf(";\n"); }
         ;
 
-vardecl: datatype initvar { variable_type = -1; }
-        | constant_decl datatype initvar { variable_type = -1; }
+vardecl: datatype initvar { variable_type = -1;}
+        | constant_decl datatype initvarconst { variable_type = -1;}
         ;
 
 constant_decl: 
@@ -203,27 +205,81 @@ datatype:
         | MATRIX { printf("\tfloat[][] "); variable_type = MATRIX_TYPE; }
         ;
 
+initvarconst:  assign_var_name_first_time_const ASSIGN_OPERATOR varname_arithmetic
+                {
+                    initializevariable(var_types, $1);    
+                    printf("%s = %s", $1, $3); 
+                    free($3); 
+                    free($1); 
+                }
+              | assign_var_name_first_time_const ASSIGN_OPERATOR value_arithmetic
+                {
+                    initializevariable(var_types, $1);
+                    printf("%s = %s", $1, $3); 
+                    free($3); 
+                    free($1); 
+                }
+              | assign_var_name_first_time_const ASSIGN_OPERATOR term
+                {
+                    initializevariable(var_types, $1);
+                    printf("%s = %s", $1, $3); 
+                    free($3); 
+                    free($1); 
+                }
+             |  assign_var_name_first_time_const ASSIGN_OPERATOR READ
+                {
+                    if(checktype(var_types, $1) != STRING_TYPE)
+                    {
+                        yyerror("Must be String type to read from stdin");
+                    }
+                    initializevariable(var_types, $1);
+                    printf("%s = scan()", $1);                
+                }
+
+        ;
+
 initvar: 
         assign_var_name_first_time ASSIGN_OPERATOR varname_arithmetic 
         {
-            initializevariable(var_types, $1);
-            printf("%s = %s", $1, $3); 
-            free($3); 
-            free($1); 
+            if(!isconst(var_types, $1))
+            {
+                initializevariable(var_types, $1);
+                printf("%s = %s", $1, $3); 
+                free($3); 
+                free($1); 
+            }
+            else
+            {
+                yyerror("Can't reinitialize constant variable");
+            }
         }
         | assign_var_name_first_time ASSIGN_OPERATOR value_arithmetic
         {
-            initializevariable(var_types, $1);
-            printf("%s = %s", $1, $3); 
-            free($3); 
-            free($1); 
+            if(!isconst(var_types, $1))
+            {
+                initializevariable(var_types, $1);
+                printf("%s = %s", $1, $3); 
+                free($3); 
+                free($1); 
+            }
+            else
+            {
+                yyerror("Can't reinitialize constant variable");
+            }
         }
         | assign_var_name_first_time ASSIGN_OPERATOR term
         {
-            initializevariable(var_types, $1);
-            printf("%s = %s", $1, $3); 
-            free($3); 
-            free($1); 
+            if(!isconst(var_types, $1))
+            {
+                initializevariable(var_types, $1);
+                printf("%s = %s", $1, $3); 
+                free($3); 
+                free($1); 
+            }
+            else
+            {
+                yyerror("Can't reinitialize constant variable");
+            }
         }
         |  assign_var_name_first_time ASSIGN_OPERATOR READ
             {
@@ -231,8 +287,16 @@ initvar:
                 {
                     yyerror("Must be String type to read from stdin");
                 }
-                initializevariable(var_types, $1);
-                printf("%s = scan()", $1);
+                else if(!isconst(var_types, $1))
+                {
+                    initializevariable(var_types, $1);
+                    printf("%s = scan()", $1);                
+                }
+                else
+                {
+                    yyerror("Can't reinitialize constant variable");
+                }
+
             }
         | assign_var_name_first_time 
         {
@@ -244,24 +308,46 @@ initvar:
 reinitvar:
     assign_var_name ASSIGN_OPERATOR varname_arithmetic 
         {
-            initializevariable(var_types, $1);
-            printf("\t%s = %s", $1, $3); 
-            free($3); 
-            free($1); 
+            if(!isconst(var_types, $1))
+            {
+                initializevariable(var_types, $1);
+                printf("\t%s = %s", $1, $3); 
+                free($3); 
+                free($1); 
+            }
+            else
+            {
+                yyerror("Can't reinitialize constant variable");
+            }
+
         }
     |   assign_var_name ASSIGN_OPERATOR value_arithmetic
         {
-            initializevariable(var_types, $1);
-            printf("\t%s = %s", $1, $3); 
-            free($3); 
-            free($1); 
+            if(!isconst(var_types, $1))
+            {
+                initializevariable(var_types, $1);
+                printf("\t%s = %s", $1, $3); 
+                free($3); 
+                free($1); 
+            }
+            else
+            {
+                yyerror("Can't reinitialize constant variable");
+            }
         }
     |   assign_var_name ASSIGN_OPERATOR term
         {
-            initializevariable(var_types, $1);
-            printf("\t%s = %s", $1, $3); 
-            free($3); 
-            free($1);
+            if(!isconst(var_types, $1))
+            {
+                initializevariable(var_types, $1);
+                printf("\t%s = %s", $1, $3); 
+                free($3); 
+                free($1); 
+            }
+            else
+            {
+                yyerror("Can't reinitialize constant variable");
+            }
         }
     |   assign_var_name ASSIGN_OPERATOR READ
         {
@@ -269,13 +355,39 @@ reinitvar:
             {
                 yyerror("Must be String type to read from stdin");
             }
-            initializevariable(var_types, $1);
-            printf("%s = scan()", $1);
+            else if(!isconst(var_types, $1))
+            {
+                initializevariable(var_types, $1);
+                printf("%s = scan()", $1);
+            }
+            else
+            {
+                yyerror("Can't reinitialize constant variable");
+            }
+
         }
     | assign_var_name 
         { 
             printf("\t%s", $1); 
             free($1); 
+        }
+        ;
+assign_var_name_first_time_const:
+        VAR_NAME 
+        {   
+            int left_var_type = checktype(var_types, $1);
+
+            if(left_var_type == -1)
+            {
+                char* var = malloc(strlen($1));
+                strcpy(var, $1);
+                addvariabletomap(var_types, variable_type, var, 1);
+                initializevariable(var_types, var);
+            }
+            else
+            {
+                yyerror("variable already exists");
+            } 
         }
         ;
 
@@ -289,6 +401,7 @@ assign_var_name_first_time:
                 char* var = malloc(strlen($1));
                 strcpy(var, $1);
                 addvariabletomap(var_types, variable_type, var, 0);
+                initializevariable(var_types, var);
             }
             else
             {
@@ -836,7 +949,7 @@ condition:      true_statement
     ;
 
 num_arithmetic_statement:
-    num_and_num_var_arithmetic { printf("%s", $1); }
+    num_and_num_var_arithmetic { printf("%s", $1);}
     ;
 
 num_and_num_var_arithmetic:
